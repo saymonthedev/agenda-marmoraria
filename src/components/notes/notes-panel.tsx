@@ -6,6 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { EmptyState } from "@/components/shared/empty-state"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { formatDateTime } from "@/lib/dates"
@@ -15,7 +16,7 @@ type Note = {
   id: string
   content: string
   createdAt: Date
-  author: { id: string; name: string }
+  author: { id: string; name: string } | null
 }
 
 export function NotesPanel({
@@ -84,26 +85,28 @@ export function NotesPanel({
                 <div>
                   <p className="text-sm text-foreground whitespace-pre-wrap">{note.content}</p>
                   <p className="mt-1.5 text-xs text-muted-foreground">
-                    {note.author.name} · {formatDateTime(note.createdAt)}
+                    {note.author?.name ?? "Usuário removido"} · {formatDateTime(note.createdAt)}
                   </p>
                 </div>
-                {(isAdmin || note.author.id === currentUserId) && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Excluir observação"
-                    onClick={async () => {
-                      const result = await deleteNote(note.id)
-                      if (!result.ok) {
-                        toast.error(result.error)
-                        return
-                      }
-                      toast.success("Observação removida.")
-                      router.refresh()
-                    }}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                {(isAdmin || note.author?.id === currentUserId) && (
+                  <TooltipWrap label="Excluir observação">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Excluir observação"
+                      onClick={async () => {
+                        const result = await deleteNote(note.id)
+                        if (!result.ok) {
+                          toast.error(result.error)
+                          return
+                        }
+                        toast.success("Observação removida.")
+                        router.refresh()
+                      }}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </TooltipWrap>
                 )}
               </div>
             </li>

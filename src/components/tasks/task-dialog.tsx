@@ -1,8 +1,10 @@
 "use client"
 
 import { Priority } from "@prisma/client"
+import type { ReactElement } from "react"
 import { useState } from "react"
 
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { TaskForm } from "@/components/tasks/task-form"
 import {
   Dialog,
@@ -18,6 +20,7 @@ export function TaskDialog({
   task,
   candidates,
   trigger,
+  tooltip,
 }: {
   projectId: string
   task?: {
@@ -29,13 +32,15 @@ export function TaskDialog({
     deadline: Date | null
   }
   candidates: { id: string; name: string }[]
-  trigger: React.ReactNode
+  trigger: ReactElement
+  tooltip?: string
 }) {
   const [open, setOpen] = useState(false)
+  const triggerElement = <DialogTrigger asChild>{trigger}</DialogTrigger>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {tooltip ? <TooltipWrap label={tooltip}>{triggerElement}</TooltipWrap> : triggerElement}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{task ? "Editar tarefa" : "Nova tarefa"}</DialogTitle>

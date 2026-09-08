@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { OverdueBadge, PriorityBadge } from "@/components/shared/badges"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
 import { EmptyState } from "@/components/shared/empty-state"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { TaskDialog } from "@/components/tasks/task-dialog"
 import { Button } from "@/components/ui/button"
 import {
@@ -142,20 +143,23 @@ export function TaskList({
                       projectId={projectId}
                       task={{ ...task, responsibleId: task.responsible?.id ?? null }}
                       candidates={candidates}
+                      tooltip="Editar tarefa"
                       trigger={
                         <Button variant="ghost" size="icon-sm" aria-label="Editar tarefa">
                           <Pencil className="size-4" />
                         </Button>
                       }
                     />
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Excluir tarefa"
-                      onClick={() => setTaskToDelete(task)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <TooltipWrap label="Excluir tarefa">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Excluir tarefa"
+                        onClick={() => setTaskToDelete(task)}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </TooltipWrap>
                   </>
                 )}
               </div>

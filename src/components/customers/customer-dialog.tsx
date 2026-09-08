@@ -1,8 +1,10 @@
 "use client"
 
+import type { ReactElement } from "react"
 import { useState } from "react"
 
 import { CustomerForm } from "@/components/customers/customer-form"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import {
   Dialog,
   DialogContent,
@@ -13,7 +15,8 @@ import {
 } from "@/components/ui/dialog"
 
 type CustomerDialogProps = {
-  trigger: React.ReactNode
+  trigger: ReactElement
+  tooltip?: string
   customer?: {
     id: string
     name: string
@@ -24,12 +27,13 @@ type CustomerDialogProps = {
   }
 }
 
-export function CustomerDialog({ trigger, customer }: CustomerDialogProps) {
+export function CustomerDialog({ trigger, tooltip, customer }: CustomerDialogProps) {
   const [open, setOpen] = useState(false)
+  const triggerElement = <DialogTrigger asChild>{trigger}</DialogTrigger>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {tooltip ? <TooltipWrap label={tooltip}>{triggerElement}</TooltipWrap> : triggerElement}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{customer ? "Editar cliente" : "Novo cliente"}</DialogTitle>

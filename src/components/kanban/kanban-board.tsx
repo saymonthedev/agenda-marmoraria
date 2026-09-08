@@ -78,7 +78,7 @@ function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id: stage })
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl bg-muted/40">
+    <div className="flex h-fit w-72 shrink-0 flex-col rounded-xl bg-muted/40">
       <div className="flex items-center justify-between px-3 py-2.5">
         <span className="text-sm font-medium text-foreground">{PROJECT_STAGE_LABELS[stage]}</span>
         <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -92,9 +92,13 @@ function KanbanColumn({
           isOver && "bg-accent/10 outline-2 outline-dashed outline-accent/40"
         )}
       >
-        {projects.map((project) => (
-          <KanbanCard key={project.id} project={project} />
-        ))}
+        {projects.length === 0 ? (
+          <p className="px-1 py-2 text-center text-xs text-muted-foreground/70">
+            Nenhum projeto nesta etapa
+          </p>
+        ) : (
+          projects.map((project) => <KanbanCard key={project.id} project={project} />)
+        )}
       </div>
     </div>
   )
@@ -158,7 +162,7 @@ export function KanbanBoard({
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="flex items-start gap-4 overflow-x-auto pb-4">
         {PROJECT_STAGE_ORDER.map((stage) => (
           <KanbanColumn key={stage} stage={stage} projects={columns.get(stage) ?? []} />
         ))}

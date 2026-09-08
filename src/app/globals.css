@@ -146,6 +146,24 @@
   html {
     @apply font-sans;
   }
+
+  /* Elementos clicáveis devem sempre parecer clicáveis. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  /* Transição suave entre os temas claro e escuro (e qualquer outra mudança
+     de cor). Componentes com sua própria utilidade de transição (ex.:
+     `transition-all`) continuam tendo prioridade sobre esta regra padrão. */
+  *,
+  ::before,
+  ::after {
+    transition-property: background-color, border-color, color, fill, stroke,
+      text-decoration-color;
+    transition-timing-function: ease;
+    transition-duration: 200ms;
+  }
 }
 
 @layer utilities {

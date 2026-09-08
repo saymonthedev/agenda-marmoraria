@@ -8,6 +8,7 @@ import { toast } from "sonner"
 
 import { CalendarEventDialog } from "@/components/calendar/calendar-event-dialog"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { Button } from "@/components/ui/button"
 import { deleteCalendarEvent } from "@/server/actions/calendar"
 
@@ -37,20 +38,23 @@ export function AgendaEventActions({
       <CalendarEventDialog
         event={event}
         projects={projects}
+        tooltip="Editar evento"
         trigger={
           <Button variant="ghost" size="icon-sm" aria-label="Editar evento">
             <Pencil className="size-3.5" />
           </Button>
         }
       />
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Excluir evento"
-        onClick={() => setConfirmOpen(true)}
-      >
-        <Trash2 className="size-3.5" />
-      </Button>
+      <TooltipWrap label="Excluir evento">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Excluir evento"
+          onClick={() => setConfirmOpen(true)}
+        >
+          <Trash2 className="size-3.5" />
+        </Button>
+      </TooltipWrap>
 
       <ConfirmDialog
         open={confirmOpen}

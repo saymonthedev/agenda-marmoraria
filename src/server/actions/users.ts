@@ -136,6 +136,34 @@ export async function toggleUserActive(input: unknown): Promise<ActionResult<und
   }
 }
 
+export async function deleteUser(userId: string): Promise<ActionResult<undefined>> {
+  try {
+    const currentUser = await requireUser()
+    assertAdmin(currentUser)
+
+    if (userId === currentUser.id) {
+      throw new KnownActionError("Você não pode excluir sua própria conta.")
+    }
+
+    const target = await prisma.user.findUnique({ where: { id: userId } })
+    if (!target) return fail("Usuário não encontrado.")
+
+    if (target.role === UserRole.ADMIN && target.active) {
+      const activeAdmins = await countActiveAdmins()
+      if (activeAdmins <= 1) {
+        throw new KnownActionError("Não é possível excluir o último administrador ativo.")
+      }
+    }
+
+    await prisma.user.delete({ where: { id: userId } })
+
+    revalidatePath("/usuarios")
+    return ok(undefined)
+  } catch (error) {
+    return toActionError(error)
+  }
+}
+
 export async function changeOwnPassword(input: unknown): Promise<ActionResult<undefined>> {
   try {
     const currentUser = await requireUser()

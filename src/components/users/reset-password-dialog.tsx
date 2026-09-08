@@ -2,11 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
+import type { ReactElement } from "react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -29,10 +31,12 @@ export function ResetPasswordDialog({
   userId,
   userName,
   trigger,
+  tooltip,
 }: {
   userId: string
   userName: string
-  trigger: React.ReactNode
+  trigger: ReactElement
+  tooltip?: string
 }) {
   const [open, setOpen] = useState(false)
   const {
@@ -56,9 +60,11 @@ export function ResetPasswordDialog({
     setOpen(false)
   }
 
+  const triggerElement = <DialogTrigger asChild>{trigger}</DialogTrigger>
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {tooltip ? <TooltipWrap label={tooltip}>{triggerElement}</TooltipWrap> : triggerElement}
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Redefinir senha</DialogTitle>

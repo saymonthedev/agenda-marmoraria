@@ -4,6 +4,7 @@ import Link from "next/link"
 import { FolderKanban, Kanban, Plus } from "lucide-react"
 
 import { ProjectFilters } from "@/components/projects/project-filters"
+import { ProjectRowActions } from "@/components/projects/project-row-actions"
 import { PriorityBadge, StageBadge } from "@/components/shared/badges"
 import { EmptyState } from "@/components/shared/empty-state"
 import { PageHeader } from "@/components/shared/page-header"
@@ -63,7 +64,11 @@ export default async function ProjectsPage({
     listResponsibleCandidates(),
   ])
 
-  const canCreate = isAdmin(user) || hasPermission(user, Permission.PROJECTS_CREATE)
+  const admin = isAdmin(user)
+  const canCreate = admin || hasPermission(user, Permission.PROJECTS_CREATE)
+  const canEdit = admin || hasPermission(user, Permission.PROJECTS_EDIT)
+  const canDelete = admin || hasPermission(user, Permission.PROJECTS_DELETE)
+  const showActionsColumn = canEdit || canDelete || admin
   const hasFilters = Boolean(filters.q || filters.stage || filters.priority || filters.responsibleId)
 
   return (
@@ -129,11 +134,12 @@ export default async function ProjectsPage({
                 <TableHead className="hidden sm:table-cell">Prioridade</TableHead>
                 <TableHead className="hidden sm:table-cell">Prazo</TableHead>
                 <TableHead>Situação</TableHead>
+                {showActionsColumn && <TableHead className="w-24" />}
               </TableRow>
             </TableHeader>
             <TableBody>
               {projects.map((project) => (
-                <TableRow key={project.id} className="cursor-pointer">
+                <TableRow key={project.id}>
                   <TableCell className="font-medium">
                     <Link href={`/projetos/${project.id}`} className="hover:text-accent hover:underline">
                       {project.name}
@@ -158,6 +164,18 @@ export default async function ProjectsPage({
                   <TableCell>
                     <ProjectSituation stage={project.stage} deadline={project.deadline} />
                   </TableCell>
+                  {showActionsColumn && (
+                    <TableCell>
+                      <ProjectRowActions
+                        projectId={project.id}
+                        projectName={project.name}
+                        active={project.active}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        canHardDelete={admin}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

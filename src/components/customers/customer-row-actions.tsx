@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { CustomerDialog } from "@/components/customers/customer-dialog"
 import { ConfirmDialog } from "@/components/shared/confirm-dialog"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { Button } from "@/components/ui/button"
 import { deleteCustomer } from "@/server/actions/customers"
 
@@ -29,20 +30,23 @@ export function CustomerRowActions({ customer, canManage }: { customer: Customer
     <div className="flex items-center justify-end gap-1">
       <CustomerDialog
         customer={customer}
+        tooltip="Editar cliente"
         trigger={
           <Button variant="ghost" size="icon-sm" aria-label="Editar cliente">
             <Pencil className="size-4" />
           </Button>
         }
       />
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Excluir cliente"
-        onClick={() => setConfirmOpen(true)}
-      >
-        <Trash2 className="size-4" />
-      </Button>
+      <TooltipWrap label="Excluir cliente">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Excluir cliente"
+          onClick={() => setConfirmOpen(true)}
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </TooltipWrap>
 
       <ConfirmDialog
         open={confirmOpen}

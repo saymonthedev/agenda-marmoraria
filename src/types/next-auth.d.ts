@@ -22,6 +22,7 @@ declare module "next-auth/jwt" {
     role: UserRole
     permissions: Permission[]
     active: boolean
+    validatedAt: number
   }
 }
 
@@ -31,5 +32,6 @@ declare module "@auth/core/jwt" {
     role: UserRole
     permissions: Permission[]
     active: boolean
+    validatedAt: number
   }
 }

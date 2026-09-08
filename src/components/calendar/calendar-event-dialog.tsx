@@ -1,9 +1,11 @@
 "use client"
 
 import { EventType } from "@prisma/client"
+import type { ReactElement } from "react"
 import { useState } from "react"
 
 import { CalendarEventForm } from "@/components/calendar/calendar-event-form"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,7 @@ export function CalendarEventDialog({
   defaultProjectId,
   projects,
   trigger,
+  tooltip,
 }: {
   event?: {
     id: string
@@ -31,13 +34,15 @@ export function CalendarEventDialog({
   }
   defaultProjectId?: string
   projects: { id: string; name: string }[]
-  trigger: React.ReactNode
+  trigger: ReactElement
+  tooltip?: string
 }) {
   const [open, setOpen] = useState(false)
+  const triggerElement = <DialogTrigger asChild>{trigger}</DialogTrigger>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {tooltip ? <TooltipWrap label={tooltip}>{triggerElement}</TooltipWrap> : triggerElement}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{event ? "Editar evento" : "Novo evento"}</DialogTitle>

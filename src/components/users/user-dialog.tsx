@@ -1,8 +1,10 @@
 "use client"
 
 import { Permission, UserRole } from "@prisma/client"
+import type { ReactElement } from "react"
 import { useState } from "react"
 
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import {
   Dialog,
   DialogContent,
@@ -16,6 +18,7 @@ import { UserForm } from "@/components/users/user-form"
 export function UserDialog({
   user,
   trigger,
+  tooltip,
 }: {
   user?: {
     id: string
@@ -24,13 +27,15 @@ export function UserDialog({
     role: UserRole
     permissions: Permission[]
   }
-  trigger: React.ReactNode
+  trigger: ReactElement
+  tooltip?: string
 }) {
   const [open, setOpen] = useState(false)
+  const triggerElement = <DialogTrigger asChild>{trigger}</DialogTrigger>
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {tooltip ? <TooltipWrap label={tooltip}>{triggerElement}</TooltipWrap> : triggerElement}
       <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{user ? "Editar usuário" : "Novo usuário"}</DialogTitle>

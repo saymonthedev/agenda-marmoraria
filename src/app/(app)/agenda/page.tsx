@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, MapPin, Plus } from "lucide-react"
 import { CalendarEventDialog } from "@/components/calendar/calendar-event-dialog"
 import { AgendaEventActions } from "@/components/calendar/agenda-event-actions"
 import { EventTypeBadge } from "@/components/shared/badges"
+import { TooltipWrap } from "@/components/shared/tooltip-wrap"
 import { Button } from "@/components/ui/button"
 import { hasPermission, isAdmin, requireUser } from "@/lib/authorization"
 import {
@@ -93,19 +94,23 @@ export default async function AgendaPage({
         </div>
 
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon-sm" asChild>
-            <Link href={previousHref} aria-label="Período anterior">
-              <ChevronLeft className="size-4" />
-            </Link>
-          </Button>
+          <TooltipWrap label="Período anterior">
+            <Button variant="outline" size="icon-sm" asChild>
+              <Link href={previousHref} aria-label="Período anterior">
+                <ChevronLeft className="size-4" />
+              </Link>
+            </Button>
+          </TooltipWrap>
           <Button variant="outline" size="sm" asChild>
             <Link href={todayHref}>Hoje</Link>
           </Button>
-          <Button variant="outline" size="icon-sm" asChild>
-            <Link href={nextHref} aria-label="Próximo período">
-              <ChevronRight className="size-4" />
-            </Link>
-          </Button>
+          <TooltipWrap label="Próximo período">
+            <Button variant="outline" size="icon-sm" asChild>
+              <Link href={nextHref} aria-label="Próximo período">
+                <ChevronRight className="size-4" />
+              </Link>
+            </Button>
+          </TooltipWrap>
         </div>
       </div>
 
