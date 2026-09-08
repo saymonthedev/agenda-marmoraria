@@ -382,11 +382,15 @@ consulta leve (`SELECT 1`) para manter o banco "acordado", protegido por um
 token (`CRON_SECRET`) para que não possa ser chamado por qualquer pessoa.
 
 Ao publicar na Vercel, o arquivo [`vercel.json`](vercel.json) já configura um
-**Vercel Cron Job** que chama esse endpoint automaticamente a cada 6 horas —
+**Vercel Cron Job** que chama esse endpoint automaticamente uma vez por dia —
 não é necessário nenhum serviço externo. Basta garantir que a variável
 `CRON_SECRET` esteja definida nas variáveis de ambiente do projeto na
 Vercel (Cron Jobs da Vercel enviam esse mesmo valor automaticamente no
 cabeçalho de autorização).
+
+> No plano gratuito (Hobby) da Vercel, Cron Jobs só podem rodar no máximo uma
+> vez por dia — por isso o agendamento padrão é diário. Em um plano Pro, o
+> intervalo pode ser reduzido editando o campo `schedule` em `vercel.json`.
 
 Se o seu provedor de banco não sofrer com esse tipo de suspensão, esse
 endpoint é inofensivo e pode ser ignorado ou removido do `vercel.json`.
