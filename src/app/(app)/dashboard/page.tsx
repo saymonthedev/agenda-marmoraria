@@ -138,9 +138,9 @@ export default async function DashboardPage() {
 
         <div className="space-y-6">
           <section className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="font-heading text-lg font-medium">Próximos compromissos</h2>
-              <Link href="/agenda" className="text-sm text-accent hover:underline">
+              <Link href="/agenda" className="shrink-0 text-sm text-accent hover:underline">
                 Agenda
               </Link>
             </div>
