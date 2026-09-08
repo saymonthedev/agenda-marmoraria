@@ -1,4 +1,4 @@
-# Lithos — Sistema de Gestão para Marmorarias
+# Stainhaus — Sistema de Gestão para Marmorarias
 
 Sistema interno de gestão desenvolvido especificamente para o dia a dia de uma
 marmoraria: controle de clientes, projetos (bancadas, banheiros, soleiras,
@@ -34,7 +34,7 @@ sistema no dia a dia, sem precisar entender de programação).
 
 ## Visão geral
 
-O Lithos organiza o fluxo real de uma marmoraria: um cliente pede um
+O Stainhaus organiza o fluxo real de uma marmoraria: um cliente pede um
 orçamento, o orçamento é aprovado, a peça é medida, cortada, acabada,
 instalada e o projeto é concluído. O sistema acompanha cada uma dessas
 etapas, quem é responsável, o que falta fazer e quando cada compromisso
@@ -136,7 +136,7 @@ O schema completo está em [`prisma/schema.prisma`](prisma/schema.prisma).
   URL "pooled" (com pooler/pgbouncer) e uma URL direta, use a pooled em
   `DATABASE_URL` e a direta em `DIRECT_URL` (usada só para migrations).
 - **Opção 2 — PostgreSQL local:** instale o PostgreSQL na sua máquina, crie
-  um banco (ex.: `lithos`) e aponte `DATABASE_URL` (e `DIRECT_URL`, com o
+  um banco (ex.: `stainhaus`) e aponte `DATABASE_URL` (e `DIRECT_URL`, com o
   mesmo valor) para ele.
 
 ### Comandos úteis
@@ -148,7 +148,7 @@ npx prisma migrate deploy
 # Criar uma nova migration durante o desenvolvimento (quando o schema muda)
 npx prisma migrate dev --name descricao_da_mudanca
 
-# Rodar o seed manualmente (cria o administrador e alguns dados de exemplo)
+# Rodar o seed manualmente (cria apenas o usuário administrador inicial)
 npx prisma db seed
 
 # Abrir o Prisma Studio (interface visual para ver/editar os dados)
@@ -424,7 +424,7 @@ endpoint é inofensivo e pode ser ignorado ou removido do `vercel.json`.
 ```
 prisma/
   schema.prisma        # Modelo de dados (usuários, clientes, projetos, tarefas, agenda, histórico)
-  seed.ts               # Cria o administrador inicial e alguns dados de exemplo
+  seed.ts               # Cria apenas o usuário administrador inicial
 src/
   app/
     login/               # Tela de login (pública)

@@ -19,13 +19,15 @@ import { formatDate, formatRelative } from "@/lib/dates"
 import { HISTORY_ACTION_LABELS, PROJECT_STAGE_LABELS, PROJECT_STAGE_ORDER } from "@/lib/labels"
 import { getDashboardData } from "@/server/queries/dashboard"
 import { listUpcomingEvents } from "@/server/queries/calendar"
+import { getSettings } from "@/server/queries/settings"
 
 export const metadata: Metadata = { title: "Dashboard" }
 
 export default async function DashboardPage() {
   const user = await requireUser()
+  const settings = await getSettings()
   const [data, upcomingEvents] = await Promise.all([
-    getDashboardData(user),
+    getDashboardData(user, settings.dueSoonDays),
     listUpcomingEvents(user, 5),
   ])
 
@@ -56,7 +58,7 @@ export default async function DashboardPage() {
           value={data.dueSoon}
           icon={Clock}
           tone={data.dueSoon > 0 ? "warning" : "default"}
-          hint="Nos próximos 5 dias"
+          hint={`Nos próximos ${settings.dueSoonDays} dias`}
         />
         <StatCard label="Concluídos" value={data.completedTotal} icon={CheckCircle2} tone="success" />
       </div>

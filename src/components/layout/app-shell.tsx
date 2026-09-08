@@ -24,7 +24,7 @@ export function AppShell({
     <div className="flex min-h-svh">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
         <div className="flex h-16 items-center px-5">
-          <Logo className="text-sidebar-foreground" markClassName="text-sidebar-foreground" />
+          <Logo />
         </div>
         <div className="flex-1 overflow-y-auto py-4">
           <SidebarNav user={user} />
@@ -35,7 +35,7 @@ export function AppShell({
         <SheetContent side="left" className="w-64 border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
           <div className="flex h-16 items-center px-5">
-            <Logo className="text-sidebar-foreground" markClassName="text-sidebar-foreground" />
+            <Logo />
           </div>
           <div className="flex-1 overflow-y-auto py-4">
             <SidebarNav user={user} onNavigate={() => setMobileOpen(false)} />

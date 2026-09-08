@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { DatePicker } from "@/components/shared/date-picker"
+import { EntityCombobox } from "@/components/shared/entity-combobox"
 import { Textarea } from "@/components/ui/textarea"
 import { PRIORITY_LABELS, PROJECT_TYPE_LABELS } from "@/lib/labels"
 import { projectSchema, type ProjectInput } from "@/lib/validations/project"
@@ -122,18 +124,14 @@ export function ProjectForm({
             control={control}
             name="customerId"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EntityCombobox
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? "")}
+                options={customers.map((customer) => ({ value: customer.id, label: customer.name }))}
+                placeholder="Selecione o cliente"
+                searchPlaceholder="Pesquisar cliente..."
+                emptyText="Nenhum cliente encontrado."
+              />
             )}
           />
           {errors.customerId && (
@@ -147,22 +145,18 @@ export function ProjectForm({
             control={control}
             name="responsibleId"
             render={({ field }) => (
-              <Select
-                value={field.value ?? "none"}
-                onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sem responsável" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem responsável definido</SelectItem>
-                  {responsibleCandidates.map((candidate) => (
-                    <SelectItem key={candidate.id} value={candidate.id}>
-                      {candidate.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EntityCombobox
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? undefined)}
+                options={responsibleCandidates.map((candidate) => ({
+                  value: candidate.id,
+                  label: candidate.name,
+                }))}
+                placeholder="Sem responsável definido"
+                searchPlaceholder="Pesquisar responsável..."
+                emptyText="Nenhum usuário encontrado."
+                clearLabel="Sem responsável definido"
+              />
             )}
           />
         </div>
@@ -190,8 +184,18 @@ export function ProjectForm({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="deadline">Prazo previsto</Label>
-          <Input id="deadline" type="date" autoComplete="off" {...register("deadline")} />
+          <Label>Prazo previsto</Label>
+          <Controller
+            control={control}
+            name="deadline"
+            render={({ field }) => (
+              <DatePicker
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Selecionar prazo"
+              />
+            )}
+          />
         </div>
       </div>
 

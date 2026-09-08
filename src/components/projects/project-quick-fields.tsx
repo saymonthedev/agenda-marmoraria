@@ -2,11 +2,12 @@
 
 import { Priority, ProjectStage } from "@prisma/client"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { toast } from "sonner"
 
 import { PriorityBadge, StageBadge } from "@/components/shared/badges"
-import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/shared/date-picker"
+import { EntityCombobox } from "@/components/shared/entity-combobox"
 import {
   Select,
   SelectContent,
@@ -142,15 +143,13 @@ export function ResponsibleQuickSelect({
   }
 
   return (
-    <Select
-      value={responsibleId ?? "none"}
+    <EntityCombobox
+      value={responsibleId}
       disabled={isPending}
-      onValueChange={(value) => {
+      className="h-8 w-48"
+      onChange={(value) => {
         startTransition(async () => {
-          const result = await changeProjectResponsible({
-            projectId,
-            responsibleId: value === "none" ? null : value,
-          })
+          const result = await changeProjectResponsible({ projectId, responsibleId: value })
           if (!result.ok) {
             toast.error(result.error)
             return
@@ -159,19 +158,12 @@ export function ResponsibleQuickSelect({
           router.refresh()
         })
       }}
-    >
-      <SelectTrigger size="sm" className="w-48">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">Sem responsável definido</SelectItem>
-        {candidates.map((candidate) => (
-          <SelectItem key={candidate.id} value={candidate.id}>
-            {candidate.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      options={candidates.map((candidate) => ({ value: candidate.id, label: candidate.name }))}
+      placeholder="Sem responsável definido"
+      searchPlaceholder="Pesquisar responsável..."
+      emptyText="Nenhum usuário encontrado."
+      clearLabel="Sem responsável definido"
+    />
   )
 }
 
@@ -185,7 +177,6 @@ export function DeadlineQuickField({
   canEdit: boolean
 }) {
   const router = useRouter()
-  const [value, setValue] = useState(deadline ? deadline.toISOString().slice(0, 10) : "")
   const [isPending, startTransition] = useTransition()
 
   if (!canEdit) {
@@ -197,17 +188,14 @@ export function DeadlineQuickField({
   }
 
   return (
-    <Input
-      type="date"
-      autoComplete="off"
-      value={value}
+    <DatePicker
+      value={deadline ? deadline.toISOString().slice(0, 10) : undefined}
       disabled={isPending}
-      className="h-8 w-40"
-      onChange={(event) => {
-        const next = event.target.value
-        setValue(next)
+      className="h-8 w-44"
+      placeholder="Sem prazo definido"
+      onChange={(next) => {
         startTransition(async () => {
-          const result = await changeProjectDeadline({ projectId, deadline: next || null })
+          const result = await changeProjectDeadline({ projectId, deadline: next ?? null })
           if (!result.ok) {
             toast.error(result.error)
             return

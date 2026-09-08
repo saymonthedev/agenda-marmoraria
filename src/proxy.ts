@@ -22,5 +22,11 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png).*)"],
+  // Além das pastas internas do Next, exclui qualquer arquivo estático da
+  // pasta /public (imagens, ícones etc.) — sem isso, o otimizador de imagens
+  // do Next faz uma requisição interna para o arquivo que também passa pelo
+  // proxy, é redirecionada para /login e quebra a imagem.
+  matcher: [
+    "/((?!api|_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|avif)$).*)",
+  ],
 }

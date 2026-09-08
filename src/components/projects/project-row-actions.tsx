@@ -1,6 +1,6 @@
 "use client"
 
-import { Archive, ArchiveRestore, Pencil, Trash2 } from "lucide-react"
+import { Archive, ArchiveRestore, Eye, Pencil, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -30,13 +30,19 @@ export function ProjectRowActions({
   const [toggleOpen, setToggleOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  if (!canEdit && !canDelete && !canHardDelete) return null
-
   return (
     <div
       className="flex items-center justify-end gap-1"
       onClick={(event) => event.stopPropagation()}
     >
+      <TooltipWrap label="Ver detalhes">
+        <Button variant="ghost" size="icon-sm" aria-label="Ver detalhes do projeto" asChild>
+          <Link href={`/projetos/${projectId}`}>
+            <Eye className="size-4" />
+          </Link>
+        </Button>
+      </TooltipWrap>
+
       {canEdit && (
         <TooltipWrap label="Editar projeto">
           <Button variant="ghost" size="icon-sm" aria-label="Editar projeto" asChild>

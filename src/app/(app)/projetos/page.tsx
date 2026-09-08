@@ -21,15 +21,18 @@ import {
 import { hasPermission, isAdmin, requireUser } from "@/lib/authorization"
 import { formatDate, isDueSoon, isOverdue } from "@/lib/dates"
 import { listProjects, listResponsibleCandidates } from "@/server/queries/projects"
+import { getSettings } from "@/server/queries/settings"
 
 export const metadata: Metadata = { title: "Projetos" }
 
 function ProjectSituation({
   stage,
   deadline,
+  dueSoonDays,
 }: {
   stage: ProjectStage
   deadline: Date | null
+  dueSoonDays: number
 }) {
   if (stage === ProjectStage.CONCLUIDO) {
     return <span className="text-xs font-medium text-success">Concluído</span>
@@ -40,7 +43,7 @@ function ProjectSituation({
   if (isOverdue(deadline)) {
     return <span className="text-xs font-medium text-destructive">Atrasado</span>
   }
-  if (isDueSoon(deadline)) {
+  if (isDueSoon(deadline, dueSoonDays)) {
     return <span className="text-xs font-medium text-warning">Prazo próximo</span>
   }
   return <span className="text-xs text-muted-foreground">No prazo</span>
@@ -59,16 +62,16 @@ export default async function ProjectsPage({
   const user = await requireUser()
   const filters = await searchParams
 
-  const [projects, responsibleCandidates] = await Promise.all([
+  const [projects, responsibleCandidates, settings] = await Promise.all([
     listProjects(user, filters),
     listResponsibleCandidates(),
+    getSettings(),
   ])
 
   const admin = isAdmin(user)
   const canCreate = admin || hasPermission(user, Permission.PROJECTS_CREATE)
   const canEdit = admin || hasPermission(user, Permission.PROJECTS_EDIT)
   const canDelete = admin || hasPermission(user, Permission.PROJECTS_DELETE)
-  const showActionsColumn = canEdit || canDelete || admin
   const hasFilters = Boolean(filters.q || filters.stage || filters.priority || filters.responsibleId)
 
   return (
@@ -134,7 +137,7 @@ export default async function ProjectsPage({
                 <TableHead className="hidden sm:table-cell">Prioridade</TableHead>
                 <TableHead className="hidden sm:table-cell">Prazo</TableHead>
                 <TableHead>Situação</TableHead>
-                {showActionsColumn && <TableHead className="w-24" />}
+                <TableHead className="w-28" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -162,20 +165,22 @@ export default async function ProjectsPage({
                     {project.deadline ? formatDate(project.deadline) : "—"}
                   </TableCell>
                   <TableCell>
-                    <ProjectSituation stage={project.stage} deadline={project.deadline} />
+                    <ProjectSituation
+                      stage={project.stage}
+                      deadline={project.deadline}
+                      dueSoonDays={settings.dueSoonDays}
+                    />
                   </TableCell>
-                  {showActionsColumn && (
-                    <TableCell>
-                      <ProjectRowActions
-                        projectId={project.id}
-                        projectName={project.name}
-                        active={project.active}
-                        canEdit={canEdit}
-                        canDelete={canDelete}
-                        canHardDelete={admin}
-                      />
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <ProjectRowActions
+                      projectId={project.id}
+                      projectName={project.name}
+                      active={project.active}
+                      canEdit={canEdit}
+                      canDelete={canDelete}
+                      canHardDelete={admin}
+                    />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

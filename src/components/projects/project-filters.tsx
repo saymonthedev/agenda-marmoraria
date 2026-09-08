@@ -3,6 +3,7 @@
 import { Priority, ProjectStage } from "@prisma/client"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+import { EntityCombobox } from "@/components/shared/entity-combobox"
 import {
   Select,
   SelectContent,
@@ -65,22 +66,16 @@ export function ProjectFilters({
       </Select>
 
       {responsibleOptions.length > 0 && (
-        <Select
-          value={searchParams.get("responsibleId") ?? "all"}
-          onValueChange={(v) => setParam("responsibleId", v)}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Responsável" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os responsáveis</SelectItem>
-            {responsibleOptions.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <EntityCombobox
+          className="w-48"
+          value={searchParams.get("responsibleId")}
+          onChange={(value) => setParam("responsibleId", value ?? "all")}
+          options={responsibleOptions.map((option) => ({ value: option.id, label: option.name }))}
+          placeholder="Todos os responsáveis"
+          searchPlaceholder="Pesquisar responsável..."
+          emptyText="Nenhum usuário encontrado."
+          clearLabel="Todos os responsáveis"
+        />
       )}
     </div>
   )

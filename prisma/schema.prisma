@@ -1,4 +1,4 @@
-// Schema do banco de dados do Sistema Lithos
+// Schema do banco de dados do Sistema Stainhaus
 // Gestão de projetos, clientes, tarefas e agenda para marmorarias
 
 generator client {
@@ -9,6 +9,27 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Configurações gerais (registro único)
+// ---------------------------------------------------------------------------
+
+model Settings {
+  id String @id @default("singleton")
+
+  // Quantos dias antes do prazo um projeto passa a ser sinalizado como
+  // "prazo próximo" no dashboard e nas listagens.
+  dueSoonDays Int @default(5)
+
+  companyName    String?
+  companyPhone   String?
+  companyEmail   String?
+  companyAddress String?
+
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
 }
 
 // ---------------------------------------------------------------------------

@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
+import { DatePicker } from "@/components/shared/date-picker"
+import { EntityCombobox } from "@/components/shared/entity-combobox"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -88,22 +90,18 @@ export function TaskForm({ projectId, task, candidates, onSuccess }: TaskFormPro
             control={control}
             name="responsibleId"
             render={({ field }) => (
-              <Select
-                value={field.value ?? "none"}
-                onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sem responsável" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Sem responsável</SelectItem>
-                  {candidates.map((candidate) => (
-                    <SelectItem key={candidate.id} value={candidate.id}>
-                      {candidate.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EntityCombobox
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? undefined)}
+                options={candidates.map((candidate) => ({
+                  value: candidate.id,
+                  label: candidate.name,
+                }))}
+                placeholder="Sem responsável"
+                searchPlaceholder="Pesquisar responsável..."
+                emptyText="Nenhum usuário encontrado."
+                clearLabel="Sem responsável"
+              />
             )}
           />
         </div>
@@ -131,8 +129,14 @@ export function TaskForm({ projectId, task, candidates, onSuccess }: TaskFormPro
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="deadline">Prazo</Label>
-          <Input id="deadline" type="date" autoComplete="off" {...register("deadline")} />
+          <Label>Prazo</Label>
+          <Controller
+            control={control}
+            name="deadline"
+            render={({ field }) => (
+              <DatePicker value={field.value} onChange={field.onChange} placeholder="Selecionar prazo" />
+            )}
+          />
         </div>
       </div>
 

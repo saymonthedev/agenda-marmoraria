@@ -14,12 +14,12 @@ const ACTIVE_STAGES: ProjectStage[] = [
   ProjectStage.INSTALACAO,
 ]
 
-export async function getDashboardData(user: SessionUser) {
+export async function getDashboardData(user: SessionUser, dueSoonDays = 5) {
   const visibility = projectVisibilityFilter(user)
   const baseWhere: Prisma.ProjectWhereInput = { AND: [visibility, { active: true }] }
   const now = new Date()
   const soonLimit = new Date()
-  soonLimit.setDate(soonLimit.getDate() + 5)
+  soonLimit.setDate(soonLimit.getDate() + dueSoonDays)
 
   const [
     inProgress,

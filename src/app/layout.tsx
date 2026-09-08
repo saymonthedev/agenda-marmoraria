@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Lithos — Gestão para Marmorarias",
-    template: "%s · Lithos",
+    default: "Stainhaus — Gestão para Marmorarias",
+    template: "%s · Stainhaus",
   },
   description:
     "Sistema de gestão de projetos, clientes, tarefas e agenda para marmorarias.",

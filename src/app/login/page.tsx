@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { LogoMark } from "@/components/brand/logo-mark"
+import { Logo } from "@/components/brand/logo"
 import { StonePattern } from "@/components/brand/stone-pattern"
 import { getCurrentUser } from "@/lib/authorization"
 import { LoginForm } from "./login-form"
@@ -26,9 +26,8 @@ export default async function LoginPage({
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar px-12 py-12 text-sidebar-foreground lg:flex">
         <StonePattern className="pointer-events-none absolute inset-0 h-full w-full" />
 
-        <div className="relative z-10 flex items-center gap-3">
-          <LogoMark className="size-9" />
-          <span className="font-heading text-2xl font-medium tracking-wide">LITHOS</span>
+        <div className="relative z-10">
+          <Logo className="px-3.5 py-2.5" />
         </div>
 
         <div className="relative z-10 max-w-md space-y-4">
@@ -42,15 +41,14 @@ export default async function LoginPage({
         </div>
 
         <p className="relative z-10 text-xs text-sidebar-foreground/50">
-          © {new Date().getFullYear()} Lithos — Gestão para marmorarias
+          © {new Date().getFullYear()} Stainhaus Marmoraria
         </p>
       </div>
 
       <div className="flex flex-col justify-center px-6 py-12 sm:px-12 md:px-20 lg:px-16 xl:px-24">
         <div className="mx-auto w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <LogoMark className="size-8 text-foreground" />
-            <span className="font-heading text-xl font-medium tracking-wide">LITHOS</span>
+          <div className="mb-8 lg:hidden">
+            <Logo />
           </div>
 
           <div className="mb-8 space-y-1.5">

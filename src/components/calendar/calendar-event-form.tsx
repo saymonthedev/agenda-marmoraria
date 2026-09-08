@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
+import { DateTimePicker } from "@/components/shared/date-picker"
+import { EntityCombobox } from "@/components/shared/entity-combobox"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -121,35 +123,48 @@ export function CalendarEventForm({
             control={control}
             name="projectId"
             render={({ field }) => (
-              <Select
-                value={field.value ?? "none"}
-                onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Nenhum" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <EntityCombobox
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? undefined)}
+                options={projects.map((project) => ({ value: project.id, label: project.name }))}
+                placeholder="Nenhum"
+                searchPlaceholder="Pesquisar projeto..."
+                emptyText="Nenhum projeto encontrado."
+                clearLabel="Nenhum"
+              />
             )}
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="startAt">Início</Label>
-          <Input id="startAt" type="datetime-local" autoComplete="off" {...register("startAt")} />
+          <Label>Início</Label>
+          <Controller
+            control={control}
+            name="startAt"
+            render={({ field }) => (
+              <DateTimePicker
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? "")}
+                placeholder="Selecionar início"
+              />
+            )}
+          />
           {errors.startAt && <p className="text-sm text-destructive">{errors.startAt.message}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="endAt">Término (opcional)</Label>
-          <Input id="endAt" type="datetime-local" autoComplete="off" {...register("endAt")} />
+          <Label>Término (opcional)</Label>
+          <Controller
+            control={control}
+            name="endAt"
+            render={({ field }) => (
+              <DateTimePicker
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Selecionar término"
+              />
+            )}
+          />
         </div>
       </div>
 
