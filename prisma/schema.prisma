@@ -1,0 +1,287 @@
+// Schema do banco de dados do Sistema Lithos
+// Gestão de projetos, clientes, tarefas e agenda para marmorarias
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Usuários e permissões
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  COLLABORATOR
+}
+
+// Permissões granulares concedidas a colaboradores.
+// Administradores possuem acesso total independente desta lista.
+enum Permission {
+  PROJECTS_VIEW_ALL
+  PROJECTS_CREATE
+  PROJECTS_EDIT
+  PROJECTS_DELETE
+  PROJECTS_CHANGE_STAGE
+  CUSTOMERS_MANAGE
+  TASKS_MANAGE
+  AGENDA_MANAGE
+  USERS_MANAGE
+  HISTORY_VIEW
+  SETTINGS_MANAGE
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         UserRole   @default(COLLABORATOR)
+  permissions  Permission[]
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  createdById String?
+  createdBy   User?   @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdUsers User[] @relation("UserCreatedBy")
+
+  responsibleProjects Project[]        @relation("ProjectResponsible")
+  createdProjects     Project[]        @relation("ProjectCreatedBy")
+  projectMemberships  ProjectMember[]
+  responsibleTasks    Task[]           @relation("TaskResponsible")
+  notes               ProjectNote[]
+  historyEntries      ProjectHistory[]
+  createdEvents       CalendarEvent[]  @relation("EventCreatedBy")
+
+  @@index([role])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Clientes
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects Project[]
+
+  @@index([name])
+  @@map("customers")
+}
+
+// ---------------------------------------------------------------------------
+// Projetos
+// ---------------------------------------------------------------------------
+
+enum ProjectType {
+  BANCADA_COZINHA
+  BANHEIRO
+  LAVABO
+  ESCADA
+  NICHO
+  SOLEIRA
+  PEITORIL
+  AREA_GOURMET
+  CHURRASQUEIRA
+  PERSONALIZADO
+  OUTRO
+}
+
+enum ProjectStage {
+  ORCAMENTO
+  APROVADO
+  MEDICAO
+  CORTE
+  ACABAMENTO
+  INSTALACAO
+  CONCLUIDO
+  CANCELADO
+}
+
+enum Priority {
+  BAIXA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+model Project {
+  id          String       @id @default(cuid())
+  name        String
+  type        ProjectType  @default(OUTRO)
+  description String?
+  stage       ProjectStage @default(ORCAMENTO)
+  priority    Priority     @default(MEDIA)
+  deadline    DateTime?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  responsibleId String?
+  responsible   User?   @relation("ProjectResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  members ProjectMember[]
+  tasks   Task[]
+  notes   ProjectNote[]
+  history ProjectHistory[]
+  events  CalendarEvent[]
+
+  @@index([stage])
+  @@index([customerId])
+  @@index([responsibleId])
+  @@index([deadline])
+  @@map("projects")
+}
+
+// Colaboradores com acesso liberado a um projeto específico
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+// ---------------------------------------------------------------------------
+// Tarefas
+// ---------------------------------------------------------------------------
+
+enum TaskStatus {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      TaskStatus @default(PENDENTE)
+  priority    Priority   @default(MEDIA)
+  deadline    DateTime?
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  responsibleId String?
+  responsible   User?   @relation("TaskResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([responsibleId])
+  @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// Observações do projeto
+// ---------------------------------------------------------------------------
+
+model ProjectNote {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@map("project_notes")
+}
+
+// ---------------------------------------------------------------------------
+// Histórico de atividades
+// ---------------------------------------------------------------------------
+
+enum HistoryAction {
+  PROJETO_CRIADO
+  PROJETO_ATUALIZADO
+  ETAPA_ALTERADA
+  PRIORIDADE_ALTERADA
+  RESPONSAVEL_ALTERADO
+  PRAZO_ALTERADO
+  TAREFA_CRIADA
+  TAREFA_ATUALIZADA
+  TAREFA_CONCLUIDA
+  OBSERVACAO_ADICIONADA
+  PROJETO_CONCLUIDO
+  PROJETO_CANCELADO
+  PROJETO_REATIVADO
+  PROJETO_EXCLUIDO
+  EVENTO_AGENDADO
+}
+
+model ProjectHistory {
+  id          String        @id @default(cuid())
+  projectId   String
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      HistoryAction
+  description String
+  createdAt   DateTime      @default(now())
+
+  @@index([projectId])
+  @@index([createdAt])
+  @@map("project_history")
+}
+
+// ---------------------------------------------------------------------------
+// Agenda
+// ---------------------------------------------------------------------------
+
+enum EventType {
+  MEDICAO
+  INSTALACAO
+  VISITA
+  ENTREGA
+  OUTRO
+}
+
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        EventType @default(OUTRO)
+  location    String?
+  startAt     DateTime
+  endAt       DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  createdById String?
+  createdBy   User?   @relation("EventCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([startAt])
+  @@index([projectId])
+  @@map("calendar_events")
+}

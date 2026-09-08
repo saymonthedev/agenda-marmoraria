@@ -32,9 +32,14 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
+
+# arquivos de instrução para agentes de IA gerados automaticamente pelo Next.js
+/AGENTS.md
+/CLAUDE.md
 
 # typescript
 *.tsbuildinfo
