@@ -1,5 +1,11 @@
 # Stainhaus — Sistema de Gestão para Marmorarias
 
+> **Software proprietário e confidencial.** Este sistema foi desenvolvido sob
+> encomenda, exclusivamente para uso interno da **Stainhaus Marmoraria**. O
+> código, o design e esta documentação não são de uso público, não devem ser
+> redistribuídos e não estão licenciados para uso por terceiros. Todos os
+> direitos reservados.
+
 Sistema interno de gestão desenvolvido especificamente para o dia a dia de uma
 marmoraria: controle de clientes, projetos (bancadas, banheiros, soleiras,
 áreas gourmet e outros serviços em pedra), tarefas, agenda de medições e
@@ -204,7 +210,8 @@ Primeira tela após o login. Responde "o que está acontecendo na marmoraria
 hoje":
 
 - **Cartões de indicadores:** projetos em andamento, projetos atrasados,
-  projetos com prazo próximo (5 dias) e projetos concluídos.
+  projetos com prazo próximo (o número de dias é configurável em
+  Configurações → Geral) e projetos concluídos.
 - **Prioridade em aberto:** projetos de prioridade alta/urgente que ainda
   não foram concluídos.
 - **Projetos por etapa:** quantos projetos existem em cada etapa do fluxo.
@@ -229,11 +236,14 @@ marmoraria).
 
 Listagem de todos os projetos (bancadas, banheiros, soleiras, áreas
 gourmet, etc.), com pesquisa por nome/cliente e filtros por etapa,
-prioridade e responsável.
+prioridade e responsável. Cada linha tem atalhos para **ver detalhes**,
+**editar**, **desativar/reativar** e (administradores) **excluir
+definitivamente**, sem precisar abrir o projeto.
 
 - **Novo projeto** (`/projetos/novo`): formulário completo — nome, tipo de
   serviço, cliente, responsável, prioridade, prazo, descrição e quais
-  colaboradores têm acesso a esse projeto específico.
+  colaboradores têm acesso a esse projeto específico. Cliente e responsável
+  são escolhidos por um campo de busca (útil quando a lista crescer).
 - **Detalhe do projeto** (`/projetos/[id]`): tela central do sistema.
   Mostra e permite alterar diretamente a etapa, prioridade, responsável e
   prazo, além de uma barra de progresso visual. Contém quatro abas:
@@ -274,9 +284,13 @@ na aba "Agenda" do projeto correspondente.
 - **Editar:** altera nome, e-mail, perfil e permissões.
 - **Redefinir senha:** define uma nova senha provisória para o usuário.
 - **Desativar/Reativar:** um usuário desativado não consegue mais entrar no
-  sistema (a sessão dele é invalidada imediatamente, mesmo que já esteja
-  logado). Por segurança, você não pode desativar a própria conta nem
-  desativar/rebaixar o último administrador ativo do sistema.
+  sistema (a sessão dele é invalidada em até 5 minutos, mesmo que já esteja
+  logado).
+- **Excluir definitivamente:** remove o usuário por completo. Projetos e
+  tarefas em que ele era responsável continuam existindo, apenas sem
+  responsável definido.
+- Por segurança, você não pode desativar/excluir a própria conta nem
+  desativar/rebaixar/excluir o último administrador ativo do sistema.
 
 ### Histórico (`/historico`)
 
@@ -291,8 +305,14 @@ Qualquer usuário pode ver seus próprios dados e alterar sua senha aqui.
 
 ### Configurações (`/configuracoes` — administradores)
 
-Referência rápida do fluxo de etapas dos projetos e do catálogo de
-permissões disponíveis para colaboradores.
+Dividida em duas abas:
+
+- **Geral** — ajustes reais do sistema: quantos dias de antecedência um
+  projeto passa a aparecer como "prazo próximo" no dashboard e nas
+  listagens, e os dados de contato da marmoraria (nome, telefone, e-mail,
+  endereço).
+- **Referência** — consulta rápida do fluxo de etapas dos projetos e do
+  catálogo de permissões disponíveis para colaboradores.
 
 ---
 
