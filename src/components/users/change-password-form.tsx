@@ -14,7 +14,7 @@ import { changeOwnPassword } from "@/server/actions/users"
 
 type FormValues = z.infer<typeof changeOwnPasswordSchema>
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({ onSuccess }: { onSuccess?: () => void }) {
   const {
     register,
     handleSubmit,
@@ -33,6 +33,7 @@ export function ChangePasswordForm() {
     }
     toast.success("Senha alterada com sucesso.")
     reset()
+    onSuccess?.()
   }
 
   return (

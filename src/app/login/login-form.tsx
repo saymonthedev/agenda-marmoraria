@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 
+import { StoneLoader } from "@/components/brand/stone-loader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +17,9 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  // Mantém a tela de carregamento visível durante o login e também no
+  // redirecionamento seguinte, até esta tela sair de cena.
+  const [entering, setEntering] = useState(false)
 
   const {
     register,
@@ -28,10 +32,12 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
 
   async function onSubmit(values: LoginInput) {
     setFormError(null)
+    setEntering(true)
     const result = await loginAction(values)
 
     if (!result.ok) {
       setFormError(result.error)
+      setEntering(false)
       return
     }
 
@@ -40,6 +46,13 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   }
 
   return (
+    <>
+      {entering && (
+        <div className="animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm duration-300">
+          <StoneLoader label="Preparando seu ambiente de trabalho…" />
+        </div>
+      )}
+
     <form onSubmit={handleSubmit(onSubmit)} noValidate autoComplete="off" className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor="email">E-mail</Label>
@@ -110,5 +123,6 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         )}
       </Button>
     </form>
+    </>
   )
 }
