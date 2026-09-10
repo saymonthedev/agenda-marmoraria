@@ -68,8 +68,8 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
   const role = useWatch({ control, name: "role" })
 
   async function onSubmit(values: UserFormValues) {
-    if (!isEdit && (!values.password || values.password.length < 6)) {
-      setError("password", { message: "A senha deve ter pelo menos 6 caracteres" })
+    if (!isEdit && (!values.password || values.password.length < 8)) {
+      setError("password", { message: "A senha deve ter pelo menos 8 caracteres" })
       return
     }
 
@@ -105,7 +105,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="password">Senha provisória</Label>
-          <Input id="password" type="password" autoComplete="off" placeholder="Mínimo 6 caracteres" {...register("password")} />
+          <Input id="password" type="password" autoComplete="off" placeholder="Mínimo 8 caracteres" {...register("password")} />
           {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           <p className="text-xs text-muted-foreground">
             Compartilhe esta senha com o usuário. Ele poderá alterá-la depois em &quot;Minha conta&quot;.

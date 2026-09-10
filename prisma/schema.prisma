@@ -33,6 +33,22 @@ model Settings {
 }
 
 // ---------------------------------------------------------------------------
+// Tentativas de login (proteção contra força bruta)
+// ---------------------------------------------------------------------------
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@map("login_attempts")
+}
+
+// ---------------------------------------------------------------------------
 // Usuários e permissões
 // ---------------------------------------------------------------------------
 

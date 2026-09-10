@@ -4,7 +4,6 @@ import {
   CalendarDays,
   FolderKanban,
   History,
-  Kanban,
   LayoutDashboard,
   Settings,
   UserCog,
@@ -31,12 +30,6 @@ export const NAV_ITEMS: NavItem[] = [
     title: "Projetos",
     href: "/projetos",
     icon: FolderKanban,
-    isVisible: () => true,
-  },
-  {
-    title: "Kanban",
-    href: "/kanban",
-    icon: Kanban,
     isVisible: () => true,
   },
   {

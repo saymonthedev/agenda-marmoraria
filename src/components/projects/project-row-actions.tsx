@@ -86,7 +86,7 @@ export function ProjectRowActions({
         description={
           active
             ? `"${projectName}" será removido das listagens ativas, mas todo o histórico será preservado.`
-            : `"${projectName}" voltará a aparecer normalmente nas listagens e no Kanban.`
+            : `"${projectName}" voltará a aparecer normalmente nas listagens de projetos.`
         }
         confirmLabel={active ? "Desativar" : "Reativar"}
         destructive={active}

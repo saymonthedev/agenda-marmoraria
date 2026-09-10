@@ -66,7 +66,15 @@ export async function updateTask(
 
     const data = taskSchema.parse(input)
 
-    const canAccess = await canUserAccessProject(user, data.projectId)
+    // O projeto é lido da própria tarefa no banco, nunca do input do cliente:
+    // caso contrário seria possível editar uma tarefa de um projeto sem acesso
+    // apenas enviando o id de outro projeto no corpo da requisição.
+    const task = await prisma.task.findUniqueOrThrow({
+      where: { id: taskId },
+      select: { projectId: true },
+    })
+
+    const canAccess = await canUserAccessProject(user, task.projectId)
     if (!canAccess) return fail("Você não tem acesso a este projeto.")
 
     await prisma.$transaction(async (tx) => {
@@ -82,14 +90,14 @@ export async function updateTask(
       })
 
       await recordHistory(tx, {
-        projectId: data.projectId,
+        projectId: task.projectId,
         userId: user.id,
         action: HistoryAction.TAREFA_ATUALIZADA,
         description: `Tarefa "${data.title}" atualizada.`,
       })
     })
 
-    revalidateProject(data.projectId)
+    revalidateProject(task.projectId)
     return ok({ id: taskId })
   } catch (error) {
     return toActionError(error)

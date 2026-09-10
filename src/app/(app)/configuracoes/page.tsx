@@ -43,7 +43,7 @@ export default async function SettingsPage() {
             <div>
               <h2 className="font-heading text-lg font-medium">Fluxo de etapas dos projetos</h2>
               <p className="text-sm text-muted-foreground">
-                Ordem padrão utilizada no Kanban e nas listagens de projetos.
+                Ordem padrão do fluxo de trabalho, usada nas listagens e no acompanhamento dos projetos.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

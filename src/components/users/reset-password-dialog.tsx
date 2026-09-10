@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label"
 import { resetUserPassword } from "@/server/actions/users"
 
 const schema = z.object({
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
 })
 
 export function ResetPasswordDialog({

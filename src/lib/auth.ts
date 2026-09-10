@@ -4,6 +4,7 @@ import { compare } from "bcryptjs"
 
 import { prisma } from "@/lib/prisma"
 import { loginSchema } from "@/lib/validations/auth"
+import { getClientIp, isLoginBlocked, recordLoginAttempt } from "@/server/login-attempts"
 
 // Intervalo mínimo entre revalidações do usuário no banco de dados. Evita uma
 // consulta ao banco em toda navegação/requisição (o que deixava o sistema
@@ -25,16 +26,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "E-mail", type: "email" },
         password: { label: "Senha", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const parsed = loginSchema.safeParse(credentials)
         if (!parsed.success) return null
 
         const email = parsed.data.email.toLowerCase()
+        const ip = getClientIp(request.headers)
+
+        // A checagem fica aqui (e não só na Server Action da tela de login)
+        // porque o endpoint de credenciais pode ser chamado diretamente.
+        if (await isLoginBlocked(email, ip)) return null
+
         const user = await prisma.user.findUnique({ where: { email } })
-        if (!user || !user.active) return null
+
+        if (!user || !user.active) {
+          await recordLoginAttempt(email, ip, false)
+          return null
+        }
 
         const passwordMatches = await compare(parsed.data.password, user.passwordHash)
-        if (!passwordMatches) return null
+
+        if (!passwordMatches) {
+          await recordLoginAttempt(email, ip, false)
+          return null
+        }
+
+        await recordLoginAttempt(email, ip, true)
 
         return {
           id: user.id,

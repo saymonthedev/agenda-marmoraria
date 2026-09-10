@@ -32,9 +32,10 @@ sistema no dia a dia, sem precisar entender de programação).
 10. [Variáveis de ambiente](#variáveis-de-ambiente)
 11. [Manter o banco ativo (keep-alive)](#manter-o-banco-ativo-keep-alive)
 12. [Deploy na Vercel](#deploy-na-vercel)
-13. [Estrutura do projeto](#estrutura-do-projeto)
-14. [Solução de problemas](#solução-de-problemas)
-15. [Credenciais iniciais](#credenciais-iniciais)
+13. [Segurança](#segurança)
+14. [Estrutura do projeto](#estrutura-do-projeto)
+15. [Solução de problemas](#solução-de-problemas)
+16. [Credenciais iniciais](#credenciais-iniciais)
 
 ---
 
@@ -51,7 +52,6 @@ Principais funcionalidades:
 - **Clientes** — cadastro completo com histórico de projetos.
 - **Projetos** — nome, tipo de serviço, cliente, responsável, prazo,
   prioridade, etapa, descrição, tarefas, observações e histórico.
-- **Kanban** — visualização das etapas com cartões arrastáveis.
 - **Tarefas** — divisão de cada projeto em atividades menores.
 - **Agenda** — compromissos (medição, instalação, visita, entrega) em
   visualização diária, semanal e mensal, vinculados a projetos.
@@ -71,7 +71,6 @@ Principais funcionalidades:
 - [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/)
 - [Auth.js (NextAuth v5)](https://authjs.dev/) com login por credenciais
 - [Zod](https://zod.dev/) + [React Hook Form](https://react-hook-form.com/) para validação de formulários
-- [@dnd-kit](https://dndkit.com/) para o quadro Kanban
 - [Vercel](https://vercel.com/) como plataforma de deploy
 
 ---
@@ -257,15 +256,6 @@ definitivamente**, sem precisar abrir o projeto.
 - **Editar projeto** (`/projetos/[id]/editar`): mesmo formulário de criação,
   pré-preenchido.
 
-### Kanban (`/kanban`)
-
-Visualização em colunas (Orçamento → Aprovado → Medição → Corte →
-Acabamento → Instalação → Concluído). Cada cartão mostra o projeto, cliente,
-responsável, prazo, prioridade e um aviso quando está atrasado. Arraste um
-cartão para outra coluna para mudar a etapa do projeto — a mudança é salva
-automaticamente no banco de dados. Quem não tem permissão para alterar
-etapas visualiza o quadro em modo somente leitura.
-
 ### Agenda (`/agenda`)
 
 Compromissos da operação: medições, instalações, visitas e entregas.
@@ -324,8 +314,8 @@ Um exemplo completo do dia a dia:
 2. **Cadastrar o cliente** em Clientes (se ainda não existir).
 3. **Criar o projeto** em Projetos → Novo projeto, com etapa inicial
    "Orçamento", prioridade e prazo estimado.
-4. **Orçamento aprovado** → mover o projeto para a etapa "Aprovado" (pelo
-   Kanban ou diretamente na tela do projeto).
+4. **Orçamento aprovado** → mover o projeto para a etapa "Aprovado"
+   diretamente na tela do projeto.
 5. **Agendar a medição** na Agenda, vinculada a este projeto, e mover o
    projeto para "Medição".
 6. Após a medição, criar tarefas como "Confirmar medidas" e "Separar
@@ -362,8 +352,9 @@ entender de programação:
 10. Saia do sistema (menu do usuário → **Sair**) e entre com o colaborador
     recém-criado. Confirme que os menus **Usuários** e **Configurações**
     não aparecem para ele (permissões funcionando).
-11. Acesse o **Kanban** e confirme que os projetos aparecem organizados por
-    etapa.
+11. Acesse **Projetos** e confirme que a lista aparece com as etapas de cada
+    projeto. Abra um projeto pelo botão **Detalhe** e verifique as abas de
+    tarefas, observações, agenda e histórico.
 12. Acesse a **Agenda**, crie um evento de teste (ex.: tipo "Visita") e
     confirme que ele aparece na visualização do dia/semana/mês.
 13. Volte para o **Dashboard** e confira se os números dos cartões mudaram
@@ -439,6 +430,39 @@ endpoint é inofensivo e pode ser ignorado ou removido do `vercel.json`.
 
 ---
 
+## Segurança
+
+O sistema foi construído para uso interno de uma empresa, com várias camadas
+de proteção:
+
+- **Sem cadastro público.** Só o administrador cria contas. A tela de login é
+  a única página pública.
+- **Senhas com hash.** As senhas nunca são guardadas em texto puro — são
+  gravadas com hash bcrypt. O mínimo é de 8 caracteres.
+- **Autorização no servidor, não na tela.** Esconder um botão não basta:
+  toda ação sensível (criar, editar, excluir, mudar etapa, mexer na agenda)
+  revalida o perfil e as permissões do usuário no servidor antes de executar.
+- **Isolamento de projetos.** Um colaborador sem a permissão "Visualizar
+  todos os projetos" só enxerga e altera os projetos em que é responsável ou
+  membro. O acesso é sempre derivado do banco de dados, nunca de um
+  identificador enviado pelo navegador — isso evita que alguém edite um
+  projeto de outra pessoa apenas trocando o ID na requisição.
+- **Sessão revalidada periodicamente.** Se uma conta é desativada ou tem as
+  permissões alteradas, a sessão passa a refletir isso em poucos minutos, sem
+  precisar de logout manual. Contas desativadas ou excluídas são
+  desconectadas automaticamente.
+- **Proteção contra força bruta no login.** Tentativas malsucedidas são
+  registradas; após 5 erros para o mesmo e-mail (ou 20 do mesmo endereço de
+  rede) em 15 minutos, novas tentativas são bloqueadas temporariamente. Um
+  login correto zera o bloqueio daquele e-mail.
+- **Cabeçalhos de segurança HTTP.** A aplicação envia `X-Frame-Options`,
+  `Content-Security-Policy` (bloqueando incorporação em iframes),
+  `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` e HSTS.
+- **Endpoint de manutenção protegido.** A rotina de keep-alive só executa com
+  o segredo correto (`CRON_SECRET`); sem ele, o endpoint fica indisponível.
+
+---
+
 ## Estrutura do projeto
 
 ```
@@ -452,7 +476,6 @@ src/
       dashboard/
       clientes/
       projetos/
-      kanban/
       agenda/
       usuarios/
       historico/
@@ -466,7 +489,7 @@ src/
     brand/               # Logo e identidade visual
     layout/              # Sidebar, header, menu do usuário
     shared/               # Componentes reutilizáveis (badges, empty state, confirmação, etc.)
-    customers/ projects/ tasks/ notes/ calendar/ users/ kanban/ history/
+    customers/ projects/ tasks/ notes/ calendar/ users/ history/
   lib/
     auth.ts               # Configuração do Auth.js
     authorization.ts       # Autorização server-side (sessão, permissões, redirecionamentos)

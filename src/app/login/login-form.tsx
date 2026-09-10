@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -92,9 +92,22 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         </div>
       )}
 
-      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="size-4 animate-spin" />}
-        Entrar
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="group relative h-11 w-full justify-center gap-2.5 rounded-lg bg-[linear-gradient(to_bottom,color-mix(in_oklch,var(--primary),white_14%),var(--primary))] text-[0.8rem] font-medium tracking-[0.14em] text-primary-foreground uppercase shadow-sm ring-1 ring-foreground/10 transition-all duration-200 hover:shadow-[0_10px_28px_-12px_var(--accent)] hover:brightness-110 disabled:opacity-80"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Entrando
+          </>
+        ) : (
+          <>
+            Entrar
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+          </>
+        )}
       </Button>
     </form>
   )

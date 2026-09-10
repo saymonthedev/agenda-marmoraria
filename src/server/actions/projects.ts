@@ -25,7 +25,6 @@ import { recordHistory } from "@/server/record-history"
 
 function revalidateProject(id: string) {
   revalidatePath("/projetos")
-  revalidatePath("/kanban")
   revalidatePath("/dashboard")
   revalidatePath(`/projetos/${id}`)
 }
@@ -275,6 +274,9 @@ export async function toggleProjectActive(
   try {
     const user = await requireUser()
     assertPermission(user, Permission.PROJECTS_DELETE)
+
+    const canAccess = await canUserAccessProject(user, projectId)
+    if (!canAccess) return fail("Você não tem acesso a este projeto.")
 
     await prisma.$transaction(async (tx) => {
       await tx.project.update({ where: { id: projectId }, data: { active } })

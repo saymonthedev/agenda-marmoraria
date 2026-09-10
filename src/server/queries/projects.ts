@@ -54,19 +54,6 @@ export async function listProjects(user: SessionUser, filters: ProjectFilters = 
   })
 }
 
-export async function listProjectsForKanban(user: SessionUser, filters: ProjectFilters = {}) {
-  return prisma.project.findMany({
-    where: {
-      AND: [
-        buildWhere(user, { ...filters, includeInactive: false }),
-        { stage: { not: ProjectStage.CANCELADO } },
-      ],
-    },
-    include: projectListInclude,
-    orderBy: [{ priority: "desc" }, { deadline: "asc" }],
-  })
-}
-
 export async function getProjectById(user: SessionUser, id: string) {
   const project = await prisma.project.findFirst({
     where: { id, ...buildWhere(user, { includeInactive: true }) },

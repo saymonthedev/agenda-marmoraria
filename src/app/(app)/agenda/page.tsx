@@ -154,7 +154,7 @@ function MonthGrid({
             <div
               key={key}
               className={cn(
-                "min-h-28 border-b border-r border-border p-1.5 last:border-r-0 sm:p-2",
+                "min-h-16 border-b border-r border-border p-1 last:border-r-0 sm:min-h-28 sm:p-2",
                 !inMonth && "bg-muted/20"
               )}
             >
@@ -168,7 +168,18 @@ function MonthGrid({
               >
                 {format(day, "d")}
               </span>
-              <div className="mt-1 space-y-1">
+
+              {/* Telas pequenas: pontinhos indicando compromissos no dia. */}
+              {dayEvents.length > 0 && (
+                <div className="mt-1 flex flex-wrap gap-0.5 sm:hidden">
+                  {dayEvents.slice(0, 4).map((event) => (
+                    <span key={event.id} className="size-1.5 rounded-full bg-accent" />
+                  ))}
+                </div>
+              )}
+
+              {/* A partir de sm: chips com horário e título. */}
+              <div className="mt-1 hidden space-y-1 sm:block">
                 {dayEvents.slice(0, 3).map((event) => (
                   <Link
                     key={event.id}
@@ -203,9 +214,17 @@ function DayList({
   canManage: boolean
 }) {
   const days = eachDayOfInterval({ start: range.from, end: range.to })
+  const isWeekView = days.length > 1
 
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${days.length}, minmax(0, 1fr))` }}>
+    <div
+      className={cn(
+        "grid gap-3",
+        isWeekView
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
+          : "mx-auto w-full max-w-2xl grid-cols-1"
+      )}
+    >
       {days.map((day) => {
         const key = format(day, "yyyy-MM-dd")
         const dayEvents = (eventsByDay.get(key) ?? []).sort(
@@ -213,9 +232,17 @@ function DayList({
         )
 
         return (
-          <div key={key} className="min-w-0 space-y-2 rounded-xl border border-border bg-card p-3">
+          <div
+            key={key}
+            className={cn(
+              "min-w-0 space-y-2 rounded-xl border border-border bg-card p-3",
+              isToday(day) && "border-accent/40 bg-accent/5"
+            )}
+          >
             <p className={cn("text-sm font-medium capitalize", isToday(day) && "text-accent")}>
-              {format(day, "EEEE, d 'de' MMM", { locale: ptBR })}
+              {isWeekView
+                ? format(day, "EEE, dd/MM", { locale: ptBR })
+                : format(day, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
             {dayEvents.length === 0 ? (
               <p className="text-xs text-muted-foreground">Nenhum compromisso.</p>

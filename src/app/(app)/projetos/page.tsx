@@ -1,7 +1,7 @@
 import { Permission, Priority, ProjectStage } from "@prisma/client"
 import type { Metadata } from "next"
 import Link from "next/link"
-import { FolderKanban, Kanban, Plus } from "lucide-react"
+import { FolderKanban, Plus } from "lucide-react"
 
 import { ProjectFilters } from "@/components/projects/project-filters"
 import { ProjectRowActions } from "@/components/projects/project-row-actions"
@@ -80,22 +80,14 @@ export default async function ProjectsPage({
         title="Projetos"
         description="Todos os serviços em andamento e concluídos da marmoraria."
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" asChild>
-              <Link href="/kanban">
-                <Kanban className="size-4" />
-                Kanban
+          canCreate && (
+            <Button asChild>
+              <Link href="/projetos/novo">
+                <Plus className="size-4" />
+                Novo projeto
               </Link>
             </Button>
-            {canCreate && (
-              <Button asChild>
-                <Link href="/projetos/novo">
-                  <Plus className="size-4" />
-                  Novo projeto
-                </Link>
-              </Button>
-            )}
-          </div>
+          )
         }
       />
 

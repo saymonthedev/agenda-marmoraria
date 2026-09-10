@@ -68,6 +68,18 @@ export async function updateCalendarEvent(
 
     const data = calendarEventSchema.parse(input)
 
+    // Valida o acesso ao projeto atual do evento (lido do banco) antes de
+    // permitir a edição — não basta ter acesso ao projeto informado no input.
+    const current = await prisma.calendarEvent.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { projectId: true },
+    })
+
+    if (current.projectId) {
+      const canAccessCurrent = await canUserAccessProject(user, current.projectId)
+      if (!canAccessCurrent) return fail("Você não tem acesso a este evento.")
+    }
+
     if (data.projectId) {
       const canAccess = await canUserAccessProject(user, data.projectId)
       if (!canAccess) return fail("Você não tem acesso a este projeto.")
@@ -98,6 +110,16 @@ export async function deleteCalendarEvent(eventId: string): Promise<ActionResult
   try {
     const user = await requireUser()
     assertPermission(user, Permission.AGENDA_MANAGE)
+
+    const event = await prisma.calendarEvent.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { projectId: true },
+    })
+
+    if (event.projectId) {
+      const canAccess = await canUserAccessProject(user, event.projectId)
+      if (!canAccess) return fail("Você não tem acesso a este evento.")
+    }
 
     await prisma.calendarEvent.delete({ where: { id: eventId } })
 

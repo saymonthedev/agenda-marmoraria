@@ -22,7 +22,7 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   PROJECTS_CREATE: "Permite criar novos projetos no sistema.",
   PROJECTS_EDIT: "Permite editar informações de projetos já existentes.",
   PROJECTS_DELETE: "Permite desativar ou excluir projetos.",
-  PROJECTS_CHANGE_STAGE: "Permite mover projetos entre etapas (inclusive pelo Kanban).",
+  PROJECTS_CHANGE_STAGE: "Permite mover projetos entre as etapas do fluxo.",
   CUSTOMERS_MANAGE: "Permite cadastrar, editar e remover clientes.",
   TASKS_MANAGE: "Permite criar, atribuir e concluir tarefas dos projetos.",
   AGENDA_MANAGE: "Permite criar e editar eventos na agenda.",

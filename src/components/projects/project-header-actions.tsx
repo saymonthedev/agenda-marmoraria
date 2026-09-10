@@ -59,7 +59,7 @@ export function ProjectHeaderActions({
         description={
           active
             ? "O projeto será removido das listagens ativas, mas todo o histórico será preservado."
-            : "O projeto voltará a aparecer normalmente nas listagens e no Kanban."
+            : "O projeto voltará a aparecer normalmente nas listagens de projetos."
         }
         confirmLabel={active ? "Desativar" : "Reativar"}
         destructive={active}
