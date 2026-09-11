@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, MapPin, Plus } from "lucide-react"
 
 import { CalendarEventDialog } from "@/components/calendar/calendar-event-dialog"
+import { CalendarEventDetailDialog } from "@/components/calendar/calendar-event-detail-dialog"
 import { AgendaEventActions } from "@/components/calendar/agenda-event-actions"
 import { EventTypeBadge } from "@/components/shared/badges"
 import { TooltipWrap } from "@/components/shared/tooltip-wrap"
@@ -115,7 +116,12 @@ export default async function AgendaPage({
       </div>
 
       {view === "mes" ? (
-        <MonthGrid range={range} referenceDate={date} eventsByDay={eventsByDay} />
+        <MonthGrid
+          range={range}
+          referenceDate={date}
+          eventsByDay={eventsByDay}
+          canManage={canManage}
+        />
       ) : (
         <DayList range={range} eventsByDay={eventsByDay} canManage={canManage} />
       )}
@@ -127,10 +133,12 @@ function MonthGrid({
   range,
   referenceDate,
   eventsByDay,
+  canManage,
 }: {
   range: { from: Date; to: Date }
   referenceDate: Date
   eventsByDay: Map<string, Awaited<ReturnType<typeof listCalendarEvents>>>
+  canManage: boolean
 }) {
   const days = eachDayOfInterval({ start: range.from, end: range.to })
   const weekdayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
@@ -169,26 +177,45 @@ function MonthGrid({
                 {format(day, "d")}
               </span>
 
-              {/* Telas pequenas: pontinhos indicando compromissos no dia. */}
+              {/* Telas pequenas: pontinhos clicáveis que abrem os detalhes. */}
               {dayEvents.length > 0 && (
-                <div className="mt-1 flex flex-wrap gap-0.5 sm:hidden">
+                <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
                   {dayEvents.slice(0, 4).map((event) => (
-                    <span key={event.id} className="size-1.5 rounded-full bg-accent" />
+                    <CalendarEventDetailDialog
+                      key={event.id}
+                      event={event}
+                      canManage={canManage}
+                      trigger={
+                        <button
+                          type="button"
+                          aria-label={`${formatTime(event.startAt)} ${event.title}`}
+                          className="flex size-4 cursor-pointer items-center justify-center rounded-full"
+                        >
+                          <span className="size-1.5 rounded-full bg-accent" />
+                        </button>
+                      }
+                    />
                   ))}
                 </div>
               )}
 
-              {/* A partir de sm: chips com horário e título. */}
+              {/* A partir de sm: chips com horário e título. Clicar abre os detalhes. */}
               <div className="mt-1 hidden space-y-1 sm:block">
                 {dayEvents.slice(0, 3).map((event) => (
-                  <Link
+                  <CalendarEventDetailDialog
                     key={event.id}
-                    href={event.project ? `/projetos/${event.project.id}` : "/agenda"}
-                    className="block truncate rounded-sm border border-border bg-background px-1.5 py-0.5 text-[11px] text-foreground hover:border-accent"
-                    title={event.title}
-                  >
-                    {formatTime(event.startAt)} {event.title}
-                  </Link>
+                    event={event}
+                    canManage={canManage}
+                    trigger={
+                      <button
+                        type="button"
+                        className="block w-full cursor-pointer truncate rounded-sm border border-border bg-background px-1.5 py-0.5 text-left text-[11px] text-foreground transition-colors hover:border-accent hover:bg-accent/5"
+                        title={event.title}
+                      >
+                        {formatTime(event.startAt)} {event.title}
+                      </button>
+                    }
+                  />
                 ))}
                 {dayEvents.length > 3 && (
                   <p className="px-1.5 text-[11px] text-muted-foreground">
