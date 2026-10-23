@@ -9,6 +9,8 @@ que aconteceu em cada obra.
 O código está público com autorização da Stainhaus. Os dados das capturas e
 do modo demonstração são fictícios.
 
+**Demonstração online:** [agenda-marmoraria-stainhaus.vercel.app](https://agenda-marmoraria-stainhaus.vercel.app)
+
 ![Dashboard do sistema](docs/screenshots/dashboard.png)
 
 ## A Stainhaus
@@ -23,8 +25,9 @@ mercado.
 
 ## Testar
 
-O sistema tem um **modo demonstração** pensado para quem quer conhecê-lo sem
-instalar nada de verdade:
+A forma mais rápida é abrir a
+[demonstração online](https://agenda-marmoraria-stainhaus.vercel.app) e
+escolher um perfil na tela de login. Ela roda o **modo demonstração**:
 
 - a tela de login mostra duas contas prontas, uma de administrador e uma de
   colaborador, e entra com um clique;
@@ -41,7 +44,7 @@ instalar nada de verdade:
 | Administrador | `admin@example.com` | `demo-admin` | Tudo, incluindo usuários, permissões e configurações |
 | Colaborador | `colaborador@example.com` | `demo-colaborador` | Só os projetos em que trabalha. Sem acesso a usuários e configurações |
 
-Para rodar a demonstração na sua máquina (precisa de Node.js 20+ e um
+Para rodar a mesma demonstração na sua máquina (precisa de Node.js 20+ e um
 PostgreSQL vazio):
 
 ```bash
@@ -224,9 +227,10 @@ crons rodam no máximo uma vez por dia.
 ### Publicar uma demonstração
 
 Use um projeto da Vercel e um banco **separados** da instalação real, com
-`DEMO_MODE=true`. Depois das migrations, rode `npm run db:seed:demo` contra
-esse banco. O script se recusa a rodar sem `DEMO_MODE=true`, porque apaga
-todos os dados antes de criar o cenário.
+`DEMO_MODE=true`. Depois das migrations, o cenário fictício se monta sozinho
+no primeiro acesso à tela de login. Para recriá-lo na hora, rode
+`npm run db:seed:demo` contra esse banco. O script se recusa a rodar sem
+`DEMO_MODE=true`, porque apaga todos os dados antes de criar o cenário.
 
 ## Créditos
 

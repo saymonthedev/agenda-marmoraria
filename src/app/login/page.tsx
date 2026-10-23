@@ -5,6 +5,7 @@ import { Logo } from "@/components/brand/logo"
 import { StonePattern } from "@/components/brand/stone-pattern"
 import { getCurrentUser } from "@/lib/authorization"
 import { DEMO_ACCOUNTS, DEMO_MODE, DEMO_RESET_NOTICE } from "@/lib/demo"
+import { ensureDemoData } from "@/server/demo/ensure-demo"
 import { LoginForm } from "./login-form"
 
 export const metadata: Metadata = {
@@ -18,6 +19,8 @@ export default async function LoginPage({
 }) {
   const user = await getCurrentUser()
   if (user) redirect("/dashboard")
+
+  await ensureDemoData()
 
   const params = await searchParams
   const callbackUrl = params.callbackUrl?.startsWith("/") ? params.callbackUrl : "/dashboard"
