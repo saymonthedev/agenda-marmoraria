@@ -63,7 +63,7 @@ export default async function AgendaPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-medium text-foreground">Agenda</h1>
-          <p className="text-sm text-muted-foreground capitalize">{formatAgendaTitle(view, date)}</p>
+          <p className="text-sm text-muted-foreground">{formatAgendaTitle(view, date)}</p>
         </div>
         {canManage && (
           <CalendarEventDialog
@@ -276,31 +276,13 @@ function DayList({
             ) : (
               <ul className="space-y-2">
                 {dayEvents.map((event) => (
-                  <li key={event.id} className="rounded-lg border border-border p-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {formatTime(event.startAt)}
-                        </p>
-                        <p className="truncate text-sm font-medium text-foreground">{event.title}</p>
-                        <div className="mt-1">
-                          <EventTypeBadge type={event.type} />
-                        </div>
-                        {event.location && (
-                          <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="size-3 shrink-0" />
-                            <span className="truncate">{event.location}</span>
-                          </p>
-                        )}
-                        {event.project && (
-                          <Link
-                            href={`/projetos/${event.project.id}`}
-                            className="mt-1 block text-xs text-accent hover:underline"
-                          >
-                            {event.project.name}
-                          </Link>
-                        )}
-                      </div>
+                  <li key={event.id} className="min-w-0 rounded-lg border border-border p-2.5">
+                    {/* Horário e ações numa linha só: na semana a coluna é estreita e o
+                        título precisa da largura inteira do cartão. */}
+                    <div className="flex min-h-7 items-center justify-between gap-1">
+                      <p className="text-xs font-medium text-muted-foreground tabular-nums">
+                        {formatTime(event.startAt)}
+                      </p>
                       {canManage && (
                         <AgendaEventActions
                           event={event}
@@ -308,6 +290,26 @@ function DayList({
                         />
                       )}
                     </div>
+                    <p className="mt-0.5 line-clamp-3 text-sm leading-snug font-medium text-foreground">
+                      {event.title}
+                    </p>
+                    <div className="mt-1.5">
+                      <EventTypeBadge type={event.type} />
+                    </div>
+                    {event.location && (
+                      <p className="mt-1.5 flex items-start gap-1 text-xs text-muted-foreground">
+                        <MapPin className="mt-0.5 size-3 shrink-0" />
+                        <span className="line-clamp-2">{event.location}</span>
+                      </p>
+                    )}
+                    {event.project && (
+                      <Link
+                        href={`/projetos/${event.project.id}`}
+                        className="mt-1 line-clamp-2 text-xs text-accent hover:underline"
+                      >
+                        {event.project.name}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

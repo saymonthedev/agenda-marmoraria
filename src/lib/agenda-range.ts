@@ -68,5 +68,8 @@ export function formatAgendaTitle(view: AgendaView, date: Date): string {
     const { from, to } = getAgendaRange(view, date)
     return `${format(from, "d 'de' MMM", { locale: ptBR })} – ${format(to, "d 'de' MMM 'de' yyyy", { locale: ptBR })}`
   }
-  return format(date, "MMMM 'de' yyyy", { locale: ptBR })
+  // Só a primeira letra em maiúscula ("Outubro de 2026"); a classe CSS
+  // `capitalize` deixava "De" maiúsculo no meio da frase.
+  const month = format(date, "MMMM 'de' yyyy", { locale: ptBR })
+  return month.charAt(0).toUpperCase() + month.slice(1)
 }

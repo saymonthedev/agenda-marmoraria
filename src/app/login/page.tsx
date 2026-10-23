@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { Logo } from "@/components/brand/logo"
 import { StonePattern } from "@/components/brand/stone-pattern"
 import { getCurrentUser } from "@/lib/authorization"
+import { DEMO_ACCOUNTS, DEMO_MODE, DEMO_RESET_NOTICE } from "@/lib/demo"
 import { LoginForm } from "./login-form"
 
 export const metadata: Metadata = {
@@ -52,13 +53,17 @@ export default async function LoginPage({
           </div>
 
           <div className="mb-8 space-y-1.5">
-            <h1 className="font-heading text-2xl font-medium">Entrar no sistema</h1>
+            <h1 className="font-heading text-2xl font-medium">
+              {DEMO_MODE ? "Conheça o sistema" : "Entrar no sistema"}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Use as credenciais fornecidas pela administração da marmoraria.
+              {DEMO_MODE
+                ? `${DEMO_RESET_NOTICE} Escolha um perfil para entrar.`
+                : "Use as credenciais fornecidas pela administração da marmoraria."}
             </p>
           </div>
 
-          <LoginForm callbackUrl={callbackUrl} />
+          <LoginForm callbackUrl={callbackUrl} demoAccounts={DEMO_MODE ? DEMO_ACCOUNTS : []} />
         </div>
       </div>
     </div>

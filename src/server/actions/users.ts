@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 
 import { fail, KnownActionError, ok, toActionError, type ActionResult } from "@/lib/action-result"
 import { assertAdmin, requireUser } from "@/lib/authorization"
+import { isProtectedDemoEmail } from "@/lib/demo"
 import { prisma } from "@/lib/prisma"
 import {
   changeOwnPasswordSchema,
@@ -15,6 +16,8 @@ import {
   updateUserSchema,
 } from "@/lib/validations/user"
 import { countActiveAdmins } from "@/server/queries/users"
+
+const DEMO_ACCOUNT_LOCKED = "As contas de demonstração não podem ser alteradas."
 
 export async function createUser(input: unknown): Promise<ActionResult<{ id: string }>> {
   try {
@@ -55,6 +58,7 @@ export async function updateUser(input: unknown): Promise<ActionResult<{ id: str
 
     const target = await prisma.user.findUnique({ where: { id: data.userId } })
     if (!target) return fail("Usuário não encontrado.")
+    if (isProtectedDemoEmail(target.email)) return fail(DEMO_ACCOUNT_LOCKED)
 
     const emailInUse = await prisma.user.findFirst({
       where: { email: data.email, NOT: { id: data.userId } },
@@ -93,6 +97,11 @@ export async function resetUserPassword(input: unknown): Promise<ActionResult<un
     assertAdmin(currentUser)
 
     const data = resetPasswordSchema.parse(input)
+
+    const target = await prisma.user.findUnique({ where: { id: data.userId }, select: { email: true } })
+    if (!target) return fail("Usuário não encontrado.")
+    if (isProtectedDemoEmail(target.email)) return fail(DEMO_ACCOUNT_LOCKED)
+
     const passwordHash = await hash(data.password, 12)
 
     await prisma.user.update({
@@ -119,6 +128,7 @@ export async function toggleUserActive(input: unknown): Promise<ActionResult<und
 
     const target = await prisma.user.findUnique({ where: { id: data.userId } })
     if (!target) return fail("Usuário não encontrado.")
+    if (isProtectedDemoEmail(target.email)) return fail(DEMO_ACCOUNT_LOCKED)
 
     if (target.role === UserRole.ADMIN && !data.active) {
       const activeAdmins = await countActiveAdmins()
@@ -147,6 +157,7 @@ export async function deleteUser(userId: string): Promise<ActionResult<undefined
 
     const target = await prisma.user.findUnique({ where: { id: userId } })
     if (!target) return fail("Usuário não encontrado.")
+    if (isProtectedDemoEmail(target.email)) return fail(DEMO_ACCOUNT_LOCKED)
 
     if (target.role === UserRole.ADMIN && target.active) {
       const activeAdmins = await countActiveAdmins()
@@ -170,6 +181,7 @@ export async function changeOwnPassword(input: unknown): Promise<ActionResult<un
     const data = changeOwnPasswordSchema.parse(input)
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: currentUser.id } })
+    if (isProtectedDemoEmail(user.email)) return fail(DEMO_ACCOUNT_LOCKED)
     const matches = await compare(data.currentPassword, user.passwordHash)
     if (!matches) return fail("Senha atual incorreta.")
 

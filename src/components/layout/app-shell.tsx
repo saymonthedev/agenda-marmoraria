@@ -1,6 +1,6 @@
 "use client"
 
-import { Menu } from "lucide-react"
+import { FlaskConical, Menu } from "lucide-react"
 import { useState } from "react"
 
 import { Logo } from "@/components/brand/logo"
@@ -10,12 +10,16 @@ import { UserMenu } from "@/components/layout/user-menu"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import type { SessionUser } from "@/lib/access"
+import { DEMO_RESET_NOTICE } from "@/lib/demo"
 
 export function AppShell({
   user,
+  demo = false,
   children,
 }: {
   user: SessionUser
+  /** Modo demonstração: mostra o aviso de dados fictícios acima do cabeçalho. */
+  demo?: boolean
   children: React.ReactNode
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -44,6 +48,12 @@ export function AppShell({
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {demo && (
+          <div className="flex items-center justify-center gap-2 border-b border-accent/20 bg-accent/10 px-4 py-2 text-center text-xs text-foreground/80">
+            <FlaskConical className="size-3.5 shrink-0 text-accent" />
+            {DEMO_RESET_NOTICE}
+          </div>
+        )}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-sm sm:px-6">
           <Button
             variant="ghost"

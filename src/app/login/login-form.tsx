@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck, UserRound } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -10,10 +10,18 @@ import { StoneLoader } from "@/components/brand/stone-loader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import type { DemoAccount } from "@/lib/demo"
 import { loginSchema, type LoginInput } from "@/lib/validations/auth"
 import { loginAction } from "@/server/actions/auth"
 
-export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
+export function LoginForm({
+  callbackUrl,
+  demoAccounts = [],
+}: {
+  callbackUrl: string
+  /** Só no modo demonstração: atalhos que preenchem e enviam o login. */
+  demoAccounts?: DemoAccount[]
+}) {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -24,6 +32,7 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -45,11 +54,48 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
     router.refresh()
   }
 
+  function enterAs(account: DemoAccount) {
+    setValue("email", account.email)
+    setValue("password", account.password)
+    void handleSubmit(onSubmit)()
+  }
+
   return (
     <>
       {entering && (
         <div className="animate-in fade-in-0 fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-sm duration-300">
           <StoneLoader label="Preparando seu ambiente de trabalho…" />
+        </div>
+      )}
+
+      {demoAccounts.length > 0 && (
+        <div className="mb-8 space-y-2.5">
+          {demoAccounts.map((account) => {
+            const Icon = account.role === "admin" ? ShieldCheck : UserRound
+            return (
+              <button
+                key={account.email}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => enterAs(account)}
+                className="group flex w-full items-center gap-3.5 rounded-lg border border-border bg-card px-4 py-3.5 text-left transition-colors hover:border-accent/50 hover:bg-accent/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
+              >
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent/10 text-accent">
+                  <Icon className="size-4.5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-medium">Entrar como {account.label.toLowerCase()}</span>
+                  <span className="block text-xs text-muted-foreground">{account.description}</span>
+                </span>
+                <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
+              </button>
+            )
+          })}
+          <div className="flex items-center gap-3 pt-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" />
+            ou digite os dados
+            <span className="h-px flex-1 bg-border" />
+          </div>
         </div>
       )}
 
