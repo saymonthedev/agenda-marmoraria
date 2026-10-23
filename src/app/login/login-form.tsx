@@ -32,7 +32,6 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -55,9 +54,7 @@ export function LoginForm({
   }
 
   function enterAs(account: DemoAccount) {
-    setValue("email", account.email)
-    setValue("password", account.password)
-    void handleSubmit(onSubmit)()
+    void onSubmit({ email: account.email, password: account.password })
   }
 
   return (
@@ -69,14 +66,14 @@ export function LoginForm({
       )}
 
       {demoAccounts.length > 0 && (
-        <div className="mb-8 space-y-2.5">
+        <div className="space-y-2.5">
           {demoAccounts.map((account) => {
             const Icon = account.role === "admin" ? ShieldCheck : UserRound
             return (
               <button
                 key={account.email}
                 type="button"
-                disabled={isSubmitting}
+                disabled={entering}
                 onClick={() => enterAs(account)}
                 className="group flex w-full items-center gap-3.5 rounded-lg border border-border bg-card px-4 py-3.5 text-left transition-colors hover:border-accent/50 hover:bg-accent/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
               >
@@ -91,14 +88,20 @@ export function LoginForm({
               </button>
             )
           })}
-          <div className="flex items-center gap-3 pt-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />
-            ou digite os dados
-            <span className="h-px flex-1 bg-border" />
-          </div>
+          {formError && (
+            <div
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
+            >
+              {formError}
+            </div>
+          )}
         </div>
       )}
 
+      {/* No modo demonstração as contas já estão nos botões acima; o formulário
+          manual só aparece na instalação real. */}
+      {demoAccounts.length === 0 && (
     <form onSubmit={handleSubmit(onSubmit)} noValidate autoComplete="off" className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor="email">E-mail</Label>
@@ -169,6 +172,7 @@ export function LoginForm({
         )}
       </Button>
     </form>
+      )}
     </>
   )
 }
