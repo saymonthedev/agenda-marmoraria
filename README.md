@@ -1,554 +1,238 @@
-# Stainhaus — Sistema de Gestão para Marmorarias
+# Stainhaus · Sistema de gestão para marmoraria
 
-> **Software proprietário e confidencial.** Este sistema foi desenvolvido sob
-> encomenda, exclusivamente para uso interno da **Stainhaus Marmoraria**. O
-> código, o design e esta documentação não são de uso público, não devem ser
-> redistribuídos e não estão licenciados para uso por terceiros. Todos os
-> direitos reservados.
+Sistema interno feito sob encomenda para a **Stainhaus Marmoraria**, de
+Jaraguá do Sul (SC). Ele organiza o caminho de cada peça de pedra, do
+orçamento à instalação: clientes, projetos, etapas de produção, tarefas,
+agenda de medições e entregas, equipe com permissões e o histórico de tudo o
+que aconteceu em cada obra.
 
-Sistema interno de gestão desenvolvido especificamente para o dia a dia de uma
-marmoraria: controle de clientes, projetos (bancadas, banheiros, soleiras,
-áreas gourmet e outros serviços em pedra), tarefas, agenda de medições e
-instalações, usuários e permissões, e histórico de tudo o que acontece em
-cada projeto.
+O código está público com autorização da Stainhaus. Os dados das capturas e
+do modo demonstração são fictícios.
 
-Este documento serve tanto como **manual técnico** (para quem for instalar
-ou manter o sistema) quanto como **manual de uso** (para quem vai operar o
-sistema no dia a dia, sem precisar entender de programação).
+![Dashboard do sistema](docs/screenshots/dashboard.png)
 
----
+## A Stainhaus
 
-## Índice
+A Stainhaus fornece mármore e granito, nacional e importado, para obras,
+indústrias e residências em Jaraguá do Sul e região, com mais de 30 anos de
+mercado.
 
-1. [Visão geral](#visão-geral)
-2. [Tecnologias](#tecnologias)
-3. [Requisitos](#requisitos)
-4. [Instalação](#instalação)
-5. [Banco de dados](#banco-de-dados)
-6. [Primeiro acesso](#primeiro-acesso)
-7. [Como utilizar o sistema](#como-utilizar-o-sistema)
-8. [Fluxo recomendado de utilização](#fluxo-recomendado-de-utilização)
-9. [Como testar o sistema](#como-testar-o-sistema)
-10. [Variáveis de ambiente](#variáveis-de-ambiente)
-11. [Manter o banco ativo (keep-alive)](#manter-o-banco-ativo-keep-alive)
-12. [Deploy na Vercel](#deploy-na-vercel)
-13. [Segurança](#segurança)
-14. [Estrutura do projeto](#estrutura-do-projeto)
-15. [Solução de problemas](#solução-de-problemas)
-16. [Credenciais iniciais](#credenciais-iniciais)
+- Site: [stainhaus.com.br](https://www.stainhaus.com.br)
+- Instagram: [@stainhausmarmoraria](https://www.instagram.com/stainhausmarmoraria/)
+- WhatsApp: [(47) 3370-0180](https://wa.me/554733700180)
 
----
+## Testar
 
-## Visão geral
+O sistema tem um **modo demonstração** pensado para quem quer conhecê-lo sem
+instalar nada de verdade:
 
-O Stainhaus organiza o fluxo real de uma marmoraria: um cliente pede um
-orçamento, o orçamento é aprovado, a peça é medida, cortada, acabada,
-instalada e o projeto é concluído. O sistema acompanha cada uma dessas
-etapas, quem é responsável, o que falta fazer e quando cada compromisso
-(medição, instalação, visita, entrega) está agendado.
+- a tela de login mostra duas contas prontas, uma de administrador e uma de
+  colaborador, e entra com um clique;
+- o banco vem preenchido com uma marmoraria fictícia: 8 clientes, 11
+  projetos espalhados por todas as etapas, tarefas, observações, histórico e
+  uma agenda com compromissos na semana atual;
+- um aviso fixo lembra que os dados são fictícios, e uma rotina diária
+  devolve tudo ao estado inicial;
+- as contas de demonstração não podem ter a senha trocada nem ser
+  desativadas ou excluídas.
 
-Principais funcionalidades:
+| Perfil | E-mail | Senha | O que dá para ver |
+| --- | --- | --- | --- |
+| Administrador | `admin@example.com` | `demo-admin` | Tudo, incluindo usuários, permissões e configurações |
+| Colaborador | `colaborador@example.com` | `demo-colaborador` | Só os projetos em que trabalha. Sem acesso a usuários e configurações |
 
-- **Clientes** — cadastro completo com histórico de projetos.
-- **Projetos** — nome, tipo de serviço, cliente, responsável, prazo,
-  prioridade, etapa, descrição, tarefas, observações e histórico.
-- **Tarefas** — divisão de cada projeto em atividades menores.
-- **Agenda** — compromissos (medição, instalação, visita, entrega) em
-  visualização diária, semanal e mensal, vinculados a projetos.
-- **Usuários e permissões** — o administrador cria e controla exatamente o
-  que cada colaborador pode ver e fazer.
-- **Histórico** — auditoria de tudo o que acontece em cada projeto.
-- **Dashboard** — panorama do que está acontecendo hoje na marmoraria.
-
----
-
-## Tecnologias
-
-- [Next.js 16](https://nextjs.org/) (App Router, Server Actions)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) sobre [Radix UI](https://www.radix-ui.com/)
-- [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/)
-- [Auth.js (NextAuth v5)](https://authjs.dev/) com login por credenciais
-- [Zod](https://zod.dev/) + [React Hook Form](https://react-hook-form.com/) para validação de formulários
-- [Vercel](https://vercel.com/) como plataforma de deploy
-
----
-
-## Requisitos
-
-Para rodar o projeto localmente você precisa ter instalado:
-
-- **Node.js** 20 ou superior
-- **npm** (vem junto com o Node.js)
-- Um banco de dados **PostgreSQL** — local ou de um provedor gerenciado
-  (ex.: [Neon](https://neon.tech), Supabase, Railway, Vercel Postgres)
-
-Não é necessário Docker: o projeto foi feito para rodar localmente com
-Node.js e ser publicado diretamente na Vercel, conectado a um Postgres
-gerenciado na nuvem.
-
----
-
-## Instalação
+Para rodar a demonstração na sua máquina (precisa de Node.js 20+ e um
+PostgreSQL vazio):
 
 ```bash
-# 1. Clonar o projeto
-git clone <url-do-repositorio>
+git clone https://github.com/saymonthedev/agenda-marmoraria.git
 cd agenda-marmoraria
-
-# 2. Instalar as dependências
 npm install
-
-# 3. Configurar as variáveis de ambiente
-cp .env.example .env
-# edite o arquivo .env com os valores corretos (veja a seção "Variáveis de ambiente")
-
-# 4. Gerar o Prisma Client
-npx prisma generate
-
-# 5. Rodar as migrations (cria as tabelas no banco)
+cp .env.example .env        # preencha DATABASE_URL, DIRECT_URL e AUTH_SECRET
+                            # e troque DEMO_MODE para "true"
 npx prisma migrate deploy
-
-# 6. Popular o banco com o usuário administrador inicial
-npx prisma db seed
-
-# 7. Iniciar a aplicação em modo desenvolvimento
-npm run dev
+npm run db:seed:demo        # apaga o banco e cria o cenário fictício
+npm run dev                 # http://localhost:3000
 ```
 
-Acesse **http://localhost:3000** — você será redirecionado para a tela de
-login.
-
-Para gerar a versão de produção localmente:
-
-```bash
-npm run build
-npm run start
-```
-
----
-
-## Banco de dados
-
-O schema completo está em [`prisma/schema.prisma`](prisma/schema.prisma).
-
-### Configurar o PostgreSQL
-
-- **Opção 1 — Provedor gerenciado (recomendado):** crie um banco gratuito no
-  [Neon](https://neon.tech) (ou Supabase/Railway/Vercel Postgres) e copie a
-  connection string para `DATABASE_URL` no `.env`. Se o provedor fornecer uma
-  URL "pooled" (com pooler/pgbouncer) e uma URL direta, use a pooled em
-  `DATABASE_URL` e a direta em `DIRECT_URL` (usada só para migrations).
-- **Opção 2 — PostgreSQL local:** instale o PostgreSQL na sua máquina, crie
-  um banco (ex.: `stainhaus`) e aponte `DATABASE_URL` (e `DIRECT_URL`, com o
-  mesmo valor) para ele.
-
-### Comandos úteis
-
-```bash
-# Aplicar migrations em produção/homologação (não cria novas migrations)
-npx prisma migrate deploy
-
-# Criar uma nova migration durante o desenvolvimento (quando o schema muda)
-npx prisma migrate dev --name descricao_da_mudanca
-
-# Rodar o seed manualmente (cria apenas o usuário administrador inicial)
-npx prisma db seed
-
-# Abrir o Prisma Studio (interface visual para ver/editar os dados)
-npx prisma studio
-```
-
-### Resetar o banco em desenvolvimento
-
-Se precisar zerar tudo e recomeçar (⚠️ apaga todos os dados):
-
-```bash
-npx prisma migrate reset
-```
-
-Esse comando reaplica todas as migrations do zero e roda o seed
-automaticamente ao final, recriando o usuário administrador.
-
----
-
-## Primeiro acesso
-
-O sistema **não possui cadastro público**. O seed cria automaticamente um
-único usuário administrador:
-
-- **E-mail:** `admin@admin.com`
-- **Senha:** `root`
-
-Esse é o único usuário que existe logo após a instalação. A partir dele, o
-administrador acessa **Usuários** e cria as contas dos demais colaboradores,
-definindo o perfil (Administrador ou Colaborador) e, para colaboradores,
-quais permissões cada um tem.
-
-> **Importante:** altere a senha do administrador assim que possível pela
-> tela **Minha conta** (menu do usuário, no canto superior direito).
-
----
-
-## Como utilizar o sistema
-
-A navegação principal fica na barra lateral (no celular, ela vira um menu
-que abre pelo ícone de "hambúrguer" no topo).
-
-### Login (`/login`)
-
-Tela de entrada do sistema. Peça e-mail e senha, com opção de mostrar/ocultar
-a senha, mensagens de erro claras quando as credenciais estão erradas, e
-redireciona automaticamente para o Dashboard após o login. Não existe opção
-de "criar conta" — isso é intencional.
-
-### Dashboard (`/dashboard`)
-
-Primeira tela após o login. Responde "o que está acontecendo na marmoraria
-hoje":
-
-- **Cartões de indicadores:** projetos em andamento, projetos atrasados,
-  projetos com prazo próximo (o número de dias é configurável em
-  Configurações → Geral) e projetos concluídos.
-- **Prioridade em aberto:** projetos de prioridade alta/urgente que ainda
-  não foram concluídos.
-- **Projetos por etapa:** quantos projetos existem em cada etapa do fluxo.
-- **Próximos compromissos:** os próximos eventos da agenda.
-- **Atividade recente:** últimas ações registradas nos projetos.
-
-### Clientes (`/clientes`)
-
-Cadastro de clientes (pessoas físicas ou empresas atendidas pela
-marmoraria).
-
-- **Novo cliente:** abre um formulário (nome, telefone, e-mail, endereço,
-  observações).
-- **Editar:** ícone de lápis na listagem.
-- **Excluir:** ícone de lixeira — pede confirmação e **bloqueia a exclusão**
-  se o cliente tiver projetos vinculados (é preciso remover ou transferir os
-  projetos antes).
-- **Ver detalhes:** clique no nome do cliente para ver seus dados completos
-  e a lista de projetos relacionados.
-
-### Projetos (`/projetos`)
-
-Listagem de todos os projetos (bancadas, banheiros, soleiras, áreas
-gourmet, etc.), com pesquisa por nome/cliente e filtros por etapa,
-prioridade e responsável. Cada linha tem atalhos para **ver detalhes**,
-**editar**, **desativar/reativar** e (administradores) **excluir
-definitivamente**, sem precisar abrir o projeto.
-
-- **Novo projeto** (`/projetos/novo`): formulário completo — nome, tipo de
-  serviço, cliente, responsável, prioridade, prazo, descrição e quais
-  colaboradores têm acesso a esse projeto específico. Cliente e responsável
-  são escolhidos por um campo de busca (útil quando a lista crescer).
-- **Detalhe do projeto** (`/projetos/[id]`): tela central do sistema.
-  Mostra e permite alterar diretamente a etapa, prioridade, responsável e
-  prazo, além de uma barra de progresso visual. Contém quatro abas:
-  - **Tarefas** — criar, editar, concluir e excluir tarefas do projeto.
-  - **Observações** — anotações de texto livre sobre o projeto.
-  - **Agenda** — compromissos vinculados a este projeto, com atalho para
-    agendar um novo.
-  - **Histórico** — linha do tempo com tudo o que já aconteceu no projeto.
-  - Botões de **Editar**, **Desativar/Reativar** e (só para administradores)
-    **Excluir definitivamente**.
-- **Editar projeto** (`/projetos/[id]/editar`): mesmo formulário de criação,
-  pré-preenchido.
-
-### Agenda (`/agenda`)
-
-Compromissos da operação: medições, instalações, visitas e entregas.
-Alterne entre visualização **Dia**, **Semana** e **Mês** pelos botões no
-topo, e navegue entre períodos com as setas ou o botão "Hoje". Um evento
-pode ou não estar vinculado a um projeto — ao vincular, ele também aparece
-na aba "Agenda" do projeto correspondente.
-
-### Usuários (`/usuarios` — apenas administradores)
-
-- **Novo usuário:** define nome, e-mail, senha provisória, perfil
-  (Administrador ou Colaborador) e, para colaboradores, quais permissões
-  específicas ele recebe (ver todos os projetos, criar/editar/excluir
-  projetos, alterar etapas, gerenciar clientes, tarefas, agenda, usuários,
-  ver histórico, configurações).
-- **Editar:** altera nome, e-mail, perfil e permissões.
-- **Redefinir senha:** define uma nova senha provisória para o usuário.
-- **Desativar/Reativar:** um usuário desativado não consegue mais entrar no
-  sistema (a sessão dele é invalidada em até 5 minutos, mesmo que já esteja
-  logado).
-- **Excluir definitivamente:** remove o usuário por completo. Projetos e
-  tarefas em que ele era responsável continuam existindo, apenas sem
-  responsável definido.
-- Por segurança, você não pode desativar/excluir a própria conta nem
-  desativar/rebaixar/excluir o último administrador ativo do sistema.
-
-### Histórico (`/historico`)
-
-Lista de todas as ações registradas nos projetos que o usuário tem acesso:
-criação, mudança de etapa, de prioridade, de responsável, de prazo, tarefas
-criadas/concluídas, observações adicionadas, projetos concluídos/cancelados,
-entre outras.
-
-### Minha conta (`/conta`)
-
-Qualquer usuário pode ver seus próprios dados e alterar sua senha aqui.
-
-### Configurações (`/configuracoes` — administradores)
-
-Dividida em duas abas:
-
-- **Geral** — ajustes reais do sistema: quantos dias de antecedência um
-  projeto passa a aparecer como "prazo próximo" no dashboard e nas
-  listagens, e os dados de contato da marmoraria (nome, telefone, e-mail,
-  endereço).
-- **Referência** — consulta rápida do fluxo de etapas dos projetos e do
-  catálogo de permissões disponíveis para colaboradores.
-
----
-
-## Fluxo recomendado de utilização
-
-Um exemplo completo do dia a dia:
-
-1. **Cliente entra em contato** pedindo uma bancada de cozinha.
-2. **Cadastrar o cliente** em Clientes (se ainda não existir).
-3. **Criar o projeto** em Projetos → Novo projeto, com etapa inicial
-   "Orçamento", prioridade e prazo estimado.
-4. **Orçamento aprovado** → mover o projeto para a etapa "Aprovado"
-   diretamente na tela do projeto.
-5. **Agendar a medição** na Agenda, vinculada a este projeto, e mover o
-   projeto para "Medição".
-6. Após a medição, criar tarefas como "Confirmar medidas" e "Separar
-   material", e mover o projeto para **"Corte"**.
-7. Concluídas as tarefas de corte, mover para **"Acabamento"**.
-8. **Agendar a instalação** na Agenda e mover o projeto para
-   **"Instalação"**.
-9. Após a instalação confirmada com o cliente, mover o projeto para
-   **"Concluído"**.
-10. A qualquer momento, registrar **observações** relevantes e consultar o
-    **histórico** para entender o que já foi feito.
-
----
-
-## Como testar o sistema
-
-Um roteiro simples para verificar que tudo está funcionando, sem precisar
-entender de programação:
-
-1. Acesse a tela de **login**.
-2. Entre com `admin@admin.com` / `root`.
-3. Você deve cair no **Dashboard**.
-4. Vá em **Clientes** → **Novo cliente** e cadastre um cliente de teste.
-5. Vá em **Projetos** → **Novo projeto**, selecione o cliente criado e salve.
-6. Na página do projeto criado, altere a **etapa** pelo seletor (ex.: de
-   "Orçamento" para "Aprovado") e confirme que aparece uma notificação de
-   sucesso.
-7. Na aba **Tarefas**, clique em **Nova tarefa**, preencha o título e salve.
-   Marque essa tarefa como **Concluída** no seletor de status.
-8. Na aba **Histórico**, confirme que aparecem as ações que você acabou de
-   fazer (projeto criado, etapa alterada, tarefa criada, tarefa concluída).
-9. Vá em **Usuários** → **Novo usuário**, crie um colaborador de teste com
-   apenas a permissão "Visualizar todos os projetos" e uma senha provisória.
-10. Saia do sistema (menu do usuário → **Sair**) e entre com o colaborador
-    recém-criado. Confirme que os menus **Usuários** e **Configurações**
-    não aparecem para ele (permissões funcionando).
-11. Acesse **Projetos** e confirme que a lista aparece com as etapas de cada
-    projeto. Abra um projeto pelo botão **Detalhe** e verifique as abas de
-    tarefas, observações, agenda e histórico.
-12. Acesse a **Agenda**, crie um evento de teste (ex.: tipo "Visita") e
-    confirme que ele aparece na visualização do dia/semana/mês.
-13. Volte para o **Dashboard** e confira se os números dos cartões mudaram
-    de acordo com o que foi criado.
-
-Se todos os passos acima funcionarem sem erros, o sistema está operando
-corretamente.
-
----
-
-## Variáveis de ambiente
-
-Veja também [`.env.example`](.env.example).
-
-| Variável | Obrigatória | Descrição |
-|---|---|---|
-| `DATABASE_URL` | Sim | Connection string do PostgreSQL usada pela aplicação em tempo de execução. |
-| `DIRECT_URL` | Sim | Connection string direta (sem pooler), usada apenas para rodar migrations. Em bancos sem pooler, pode ser igual à `DATABASE_URL`. |
-| `AUTH_SECRET` | Sim | Chave secreta usada para assinar as sessões. Gere uma com `npx auth secret` ou `openssl rand -base64 32`. |
-| `AUTH_URL` | Em produção | URL pública onde a aplicação está rodando (ex.: `https://seu-dominio.vercel.app`). |
-| `CRON_SECRET` | Recomendada | Token usado para proteger o endpoint de keep-alive do banco de dados (ver seção abaixo). |
-
-Nunca compartilhe o conteúdo real do seu `.env` — ele fica de fora do
-controle de versão (`.gitignore`) propositalmente.
-
----
-
-## Manter o banco ativo (keep-alive)
-
-Provedores serverless de PostgreSQL (Neon, Vercel Postgres e similares)
-colocam o banco em repouso após um período sem uso, o que causa um pequeno
-atraso ("cold start") na primeira requisição depois da inatividade.
-
-O projeto inclui um endpoint (`/api/cron/keep-alive`) que apenas executa uma
-consulta leve (`SELECT 1`) para manter o banco "acordado", protegido por um
-token (`CRON_SECRET`) para que não possa ser chamado por qualquer pessoa.
-
-Ao publicar na Vercel, o arquivo [`vercel.json`](vercel.json) já configura um
-**Vercel Cron Job** que chama esse endpoint automaticamente uma vez por dia —
-não é necessário nenhum serviço externo. Basta garantir que a variável
-`CRON_SECRET` esteja definida nas variáveis de ambiente do projeto na
-Vercel (Cron Jobs da Vercel enviam esse mesmo valor automaticamente no
-cabeçalho de autorização).
-
-> No plano gratuito (Hobby) da Vercel, Cron Jobs só podem rodar no máximo uma
-> vez por dia — por isso o agendamento padrão é diário. Em um plano Pro, o
-> intervalo pode ser reduzido editando o campo `schedule` em `vercel.json`.
-
-Se o seu provedor de banco não sofrer com esse tipo de suspensão, esse
-endpoint é inofensivo e pode ser ignorado ou removido do `vercel.json`.
-
----
-
-## Deploy na Vercel
-
-1. Suba o projeto para um repositório Git (GitHub, GitLab ou Bitbucket).
-2. Na [Vercel](https://vercel.com), clique em **Add New → Project** e
-   importe o repositório.
-3. Configure as variáveis de ambiente do projeto (mesmas do `.env.example`):
-   `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_URL` (a URL final do
-   projeto na Vercel) e `CRON_SECRET`.
-   - Se o banco Postgres já estiver conectado ao seu projeto/conta na
-     Vercel (aba **Storage**), basta vinculá-lo ao projeto que a Vercel
-     preenche essas variáveis automaticamente.
-4. Antes do primeiro deploy funcionar de ponta a ponta, rode as migrations
-   contra o banco de produção (uma única vez):
-   ```bash
-   DATABASE_URL="<connection-string-de-produção>" npx prisma migrate deploy
-   DATABASE_URL="<connection-string-de-produção>" npx prisma db seed
-   ```
-5. Clique em **Deploy**. A cada novo push no branch principal, a Vercel
-   publica automaticamente uma nova versão.
-
----
+Roteiro sugerido:
+
+1. Entre como **administrador** e veja o dashboard: atrasados, prazos
+   próximos, prioridades e a agenda da semana.
+2. Abra **Bancada da cozinha - Apto 802**, mude a etapa de "Corte" para
+   "Acabamento" e conclua uma tarefa. As duas ações aparecem na aba
+   **Histórico**.
+3. Na **Agenda**, troque entre dia, semana e mês e crie um compromisso
+   ligado a um projeto.
+4. Em **Usuários**, veja como as permissões de um colaborador são
+   escolhidas uma a uma.
+5. Saia e entre como **colaborador**: a lista de projetos encolhe para os
+   dele e os menus de administração somem. Tentar abrir `/usuarios` pela URL
+   devolve para o dashboard.
+
+## Telas
+
+| | |
+| --- | --- |
+| ![Login com as contas de demonstração](docs/screenshots/login.png) | ![Lista de projetos com filtros](docs/screenshots/projetos.png) |
+| **Login.** No modo demonstração, entra com um clique. | **Projetos.** Busca, filtros por etapa, prioridade e responsável, e situação do prazo. |
+| ![Detalhe de um projeto](docs/screenshots/projeto.png) | ![Agenda semanal](docs/screenshots/agenda.png) |
+| **Projeto.** Etapa, prioridade, responsável e prazo editáveis na própria tela, com tarefas, observações, agenda e histórico. | **Agenda.** Medições, instalações, visitas e entregas em dia, semana ou mês. |
+| ![Cadastro de usuário com permissões](docs/screenshots/usuarios.png) | <img src="docs/screenshots/mobile.png" alt="Dashboard no celular" width="260"> |
+| **Usuários.** Perfil de administrador ou colaborador, com permissões escolhidas uma a uma. | **Celular.** Todas as telas funcionam no celular, com o menu lateral virando gaveta. |
+
+O passo a passo de cada tela e o fluxo de trabalho recomendado estão no
+[manual de uso](docs/MANUAL.md).
+
+## O que o sistema faz
+
+- **Projetos** com tipo de serviço (bancada, banheiro, lavabo, escada,
+  soleira, área gourmet e outros), cliente, responsável, prioridade, prazo e
+  etapa. O fluxo segue a produção real: orçamento, aprovado, medição, corte,
+  acabamento, instalação e concluído.
+- **Tarefas, observações e histórico** dentro de cada projeto. Toda mudança
+  de etapa, prioridade, responsável ou prazo fica registrada com autor e data.
+- **Agenda** de medições, instalações, visitas e entregas, ligada ou não a
+  um projeto.
+- **Clientes** com histórico de projetos. Um cliente com projetos não pode
+  ser excluído por engano.
+- **Dashboard** com projetos em andamento, atrasados, com prazo próximo
+  (número de dias configurável) e concluídos, prioridades em aberto, próximos
+  compromissos e atividade recente.
+- **Usuários e permissões:** administradores têm acesso total. Colaboradores
+  recebem permissões específicas (ver todos os projetos, criar, editar,
+  excluir, mudar etapa, gerenciar clientes, tarefas, agenda, histórico e
+  configurações).
+- **Tema claro e escuro**, horário fixo de Brasília no servidor e interface
+  inteira em português.
 
 ## Segurança
 
-O sistema foi construído para uso interno de uma empresa, com várias camadas
-de proteção:
+O sistema guarda dados reais de clientes da marmoraria, então a proteção
+foi pensada para um uso interno de verdade:
 
-- **Sem cadastro público.** Só o administrador cria contas. A tela de login é
-  a única página pública.
-- **Senhas com hash.** As senhas nunca são guardadas em texto puro — são
-  gravadas com hash bcrypt. O mínimo é de 8 caracteres.
-- **Autorização no servidor, não na tela.** Esconder um botão não basta:
-  toda ação sensível (criar, editar, excluir, mudar etapa, mexer na agenda)
-  revalida o perfil e as permissões do usuário no servidor antes de executar.
-- **Isolamento de projetos.** Um colaborador sem a permissão "Visualizar
-  todos os projetos" só enxerga e altera os projetos em que é responsável ou
-  membro. O acesso é sempre derivado do banco de dados, nunca de um
-  identificador enviado pelo navegador — isso evita que alguém edite um
-  projeto de outra pessoa apenas trocando o ID na requisição.
-- **Sessão revalidada periodicamente.** Se uma conta é desativada ou tem as
-  permissões alteradas, a sessão passa a refletir isso em poucos minutos, sem
-  precisar de logout manual. Contas desativadas ou excluídas são
-  desconectadas automaticamente.
-- **Proteção contra força bruta no login.** Tentativas malsucedidas são
-  registradas; após 5 erros para o mesmo e-mail (ou 20 do mesmo endereço de
-  rede) em 15 minutos, novas tentativas são bloqueadas temporariamente. Um
-  login correto zera o bloqueio daquele e-mail.
-- **Cabeçalhos de segurança HTTP.** A aplicação envia `X-Frame-Options`,
-  `Content-Security-Policy` (bloqueando incorporação em iframes),
-  `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` e HSTS.
-- **Endpoint de manutenção protegido.** A rotina de keep-alive só executa com
-  o segredo correto (`CRON_SECRET`); sem ele, o endpoint fica indisponível.
+- **Sem cadastro público.** Só um administrador cria contas.
+- **Senhas com hash bcrypt**, com mínimo de 8 caracteres.
+- **Nenhuma instalação nasce com senha conhecida.** O seed lê a senha do
+  primeiro administrador de `SEED_ADMIN_PASSWORD` ou gera uma aleatória e a
+  mostra uma única vez.
+- **Autorização no servidor.** Toda ação confere perfil e permissão antes de
+  executar, e o acesso a um projeto é sempre consultado no banco, nunca
+  confiado ao navegador. Trocar o ID na requisição não abre o projeto de
+  outra pessoa.
+- **Sessão revalidada a cada 5 minutos.** Conta desativada ou excluída cai
+  sozinha, e permissões novas valem sem precisar sair e entrar.
+- **Proteção contra força bruta.** Depois de 5 erros para o mesmo e-mail (ou
+  20 do mesmo IP) em 15 minutos, o login fica bloqueado temporariamente. O
+  registro fica no banco, porque em funções serverless um contador em
+  memória não funcionaria.
+- **Cabeçalhos HTTP de segurança:** `X-Frame-Options`, CSP com
+  `frame-ancestors 'none'`, `X-Content-Type-Options`, `Referrer-Policy`,
+  `Permissions-Policy` e HSTS.
+- **Rota de manutenção fechada por padrão.** Sem `CRON_SECRET` configurado,
+  ela responde 401 para todo mundo.
 
----
+## Tecnologias
 
-## Estrutura do projeto
+- [Next.js 16](https://nextjs.org/) com App Router e Server Actions
+- React 19 e TypeScript
+- [Tailwind CSS 4](https://tailwindcss.com/) e componentes
+  [shadcn/ui](https://ui.shadcn.com/) sobre [Radix UI](https://www.radix-ui.com/)
+- PostgreSQL com [Prisma](https://www.prisma.io/)
+- [Auth.js](https://authjs.dev/) (NextAuth v5) com login por e-mail e senha
+- [Zod](https://zod.dev/) e React Hook Form na validação
+- Publicado na [Vercel](https://vercel.com/) (região São Paulo) com banco
+  PostgreSQL gerenciado
 
 ```
 prisma/
-  schema.prisma        # Modelo de dados (usuários, clientes, projetos, tarefas, agenda, histórico)
-  seed.ts               # Cria apenas o usuário administrador inicial
+  schema.prisma         modelo de dados
+  seed.ts               primeiro administrador (senha do ambiente ou aleatória)
+  seed-demo.ts          cenário fictício do modo demonstração
 src/
   app/
-    login/               # Tela de login (pública)
-    (app)/                # Área autenticada (protegida pelo proxy/middleware)
-      dashboard/
-      clientes/
-      projetos/
-      agenda/
-      usuarios/
-      historico/
-      conta/
-      configuracoes/
-    api/
-      auth/[...nextauth]/ # Rotas do Auth.js
-      cron/keep-alive/    # Endpoint de keep-alive do banco
-  components/
-    ui/                  # Componentes de interface (shadcn/ui)
-    brand/               # Logo e identidade visual
-    layout/              # Sidebar, header, menu do usuário
-    shared/               # Componentes reutilizáveis (badges, empty state, confirmação, etc.)
-    customers/ projects/ tasks/ notes/ calendar/ users/ history/
-  lib/
-    auth.ts               # Configuração do Auth.js
-    authorization.ts       # Autorização server-side (sessão, permissões, redirecionamentos)
-    access.ts              # Regras puras de permissão (compartilhadas com o cliente)
-    permissions.ts         # Catálogo e descrições das permissões
-    labels.ts              # Traduções e estilos dos enums (etapas, prioridades, status)
-    validations/           # Schemas de validação (Zod) de cada formulário
+    login/              tela de login (única página pública)
+    (app)/              área autenticada: dashboard, projetos, clientes,
+                        agenda, histórico, usuários, conta, configurações
+    api/cron/keep-alive rotina diária de manutenção
+  components/           interface por domínio (projects, calendar, users...)
+  lib/                  autenticação, autorização, permissões, validações,
+                        modo demonstração
   server/
-    actions/               # Server Actions (mutações: criar, editar, excluir)
-    queries/                # Consultas ao banco (Prisma) usadas pelas páginas
-    record-history.ts       # Helper para registrar entradas no histórico
-  middleware / proxy.ts     # Proteção de rotas (redireciona usuários não autenticados)
+    actions/            Server Actions (criar, editar, excluir)
+    queries/            consultas ao banco usadas pelas páginas
+    demo/               dados fictícios da demonstração
+  proxy.ts              proteção de rotas
 ```
 
----
+## Instalação
 
-## Solução de problemas
+Requisitos: Node.js 20 ou superior e um PostgreSQL, local ou gerenciado
+(Neon, Supabase, Railway ou Vercel Postgres).
 
-**O banco não conecta / erro "Can't reach database server"**
-Confirme se `DATABASE_URL` está correta e se o banco está acessível a
-partir da máquina/ambiente atual (firewall, IP liberado, etc.). Em
-provedores como o Neon, confirme se está usando a connection string
-completa, com `sslmode=require`.
+```bash
+npm install
+cp .env.example .env              # veja "Variáveis de ambiente"
+npx prisma migrate deploy         # cria as tabelas
+npx prisma db seed                # cria o primeiro administrador
+npm run dev                       # http://localhost:3000
+```
 
-**Erro ao rodar migrations**
-Verifique se `DIRECT_URL` aponta para uma conexão direta (sem pooler). Em
-bancos com pgbouncer/pooler, migrations podem falhar se apontarem para a
-URL "pooled".
+O seed cria o administrador com o e-mail de `SEED_ADMIN_EMAIL` e a senha de
+`SEED_ADMIN_PASSWORD`. Sem senha definida, ele gera uma aleatória e mostra no
+terminal uma única vez. Se o administrador já existe, o seed não mexe nele. A
+partir dessa conta, cadastre a equipe em **Usuários**.
 
-**Variável de ambiente ausente**
-O erro costuma indicar exatamente qual variável falta. Confira o `.env`
-contra o `.env.example` — todas as variáveis marcadas como obrigatórias
-precisam estar preenchidas.
+Para produção: `npm run build` e `npm run start`.
 
-**Seed não executado / usuário admin não existe**
-Rode `npx prisma db seed` manualmente. Se o comando não for encontrado,
-confirme que as dependências foram instaladas (`npm install`) — o seed
-depende do pacote `tsx`.
+### Variáveis de ambiente
 
-**Login inicial não funciona**
-Confirme que o seed foi executado com sucesso (ele imprime "Usuário
-administrador pronto: admin@admin.com" no terminal). Verifique também se
-não há espaços extras ao digitar o e-mail/senha.
+| Variável | Obrigatória | Descrição |
+| --- | --- | --- |
+| `DATABASE_URL` | Sim | Connection string do PostgreSQL usada pela aplicação. Em provedores com pooler, use a URL "pooled". |
+| `DIRECT_URL` | Sim | Connection string direta, usada só pelas migrations. Sem pooler, pode ser igual à `DATABASE_URL`. |
+| `AUTH_SECRET` | Sim | Chave que assina as sessões. Gere com `npx auth secret` ou `openssl rand -base64 32`. |
+| `AUTH_URL` | Em produção | URL pública da aplicação. |
+| `CRON_SECRET` | Recomendada | Protege a rotina diária de manutenção. |
+| `SEED_ADMIN_EMAIL` | Não | E-mail do primeiro administrador. Padrão: `admin@admin.com`. |
+| `SEED_ADMIN_PASSWORD` | Não | Senha do primeiro administrador (mínimo 8 caracteres). Vazia, o seed gera uma. |
+| `DEMO_MODE` | Não | `true` liga o modo demonstração. Nunca use na instalação real. |
 
-**"Erro inesperado" ao salvar algo no sistema**
-Normalmente indica um problema de conexão com o banco ou uma permissão
-insuficiente do usuário logado para aquela ação. Veja os logs do servidor
-(`npm run dev` no terminal, ou os logs da função na Vercel) para o detalhe
-técnico.
+O `.env` real fica fora do Git (ver `.gitignore` e `.vercelignore`).
 
----
+### Rotina diária e banco serverless
 
-## Credenciais iniciais
+O `vercel.json` agenda um Cron Job diário para `/api/cron/keep-alive`. A
+rotina mantém acordado o banco serverless (Neon e similares suspendem o
+banco quando fica parado) e apaga registros de login com mais de 24 horas. No
+modo demonstração, ela também devolve os dados ao cenário inicial. A Vercel
+envia o `CRON_SECRET` sozinha no cabeçalho de autorização. No plano Hobby,
+crons rodam no máximo uma vez por dia.
 
-| Campo | Valor |
-|---|---|
-| E-mail | `admin@admin.com` |
-| Senha | `root` |
-| Perfil | Administrador |
+### Deploy na Vercel
 
-**Altere essa senha assim que possível** pela tela **Minha conta**, e
-utilize essa conta apenas para configurar os demais usuários do sistema.
+1. Importe o repositório na Vercel.
+2. Cadastre as variáveis de ambiente. Se o banco estiver ligado ao projeto
+   pela aba **Storage**, a Vercel preenche as de conexão sozinha.
+3. Rode as migrations e o seed contra o banco de produção uma única vez:
+   ```bash
+   DATABASE_URL="<produção>" DIRECT_URL="<produção>" npx prisma migrate deploy
+   DATABASE_URL="<produção>" SEED_ADMIN_PASSWORD="<senha forte>" npx prisma db seed
+   ```
+4. Faça o deploy. Cada push no branch principal publica uma nova versão.
+
+### Publicar uma demonstração
+
+Use um projeto da Vercel e um banco **separados** da instalação real, com
+`DEMO_MODE=true`. Depois das migrations, rode `npm run db:seed:demo` contra
+esse banco. O script se recusa a rodar sem `DEMO_MODE=true`, porque apaga
+todos os dados antes de criar o cenário.
+
+## Créditos
+
+Desenvolvido por [Saymon Oliveira](https://saymonthedev.com) para a
+Stainhaus Marmoraria. Marca, logotipo e nome Stainhaus pertencem à
+Stainhaus Marmoraria.
+
+Todos os direitos reservados. O código está aberto para consulta, sem
+licença de uso, redistribuição ou revenda.
